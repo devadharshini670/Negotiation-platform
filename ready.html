@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Negotiation Room</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="chat-page">
+
+    <!-- Top bar -->
+
+    <div class="chat-header">
+
+        <div>
+
+            <h2>
+                🤝 Negotiation Room
+            </h2>
+
+            <p id="chatInfo">
+                Preparing negotiation...
+            </p>
+
+        </div>
+
+        <button class="restart-btn"
+                onclick="restartNegotiation()">
+
+            ↻ Restart
+
+        </button>
+
+    </div>
+
+
+    <!-- Chat -->
+
+    <div id="chatBox"
+         class="chat-box">
+
+    </div>
+
+
+    <!-- Bottom controls -->
+
+    <div class="chat-controls">
+
+        <button id="nextBtn"
+                class="offer-btn"
+                onclick="nextMessage()">
+
+            Generate Next Offer
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>

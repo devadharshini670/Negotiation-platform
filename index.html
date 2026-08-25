@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Negotiation AI - Scenario</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="page-container">
+
+    <div class="header">
+        <div class="logo">🤝 Negotiation AI</div>
+        <p>Choose a scenario to begin your negotiation</p>
+    </div>
+
+    <div class="scenario-grid">
+
+        <div class="scenario-card">
+            <div class="icon">🏪</div>
+
+            <h2>Vendor Pricing</h2>
+
+            <p>
+                Negotiate product pricing between a buyer and vendor.
+            </p>
+
+            <button class="primary-btn"
+                    onclick="selectScenario('vendor')">
+                Start Negotiation →
+            </button>
+        </div>
+
+
+        <div class="scenario-card">
+            <div class="icon">💼</div>
+
+            <h2>Job Offer</h2>
+
+            <p>
+                Negotiate salary and compensation between a candidate and HR.
+            </p>
+
+            <button class="primary-btn"
+                    onclick="selectScenario('job')">
+                Start Negotiation →
+            </button>
+        </div>
+
+
+        <div class="scenario-card">
+            <div class="icon">📊</div>
+
+            <h2>Project Budget</h2>
+
+            <p>
+                Negotiate project funding between a manager and finance team.
+            </p>
+
+            <button class="primary-btn"
+                    onclick="selectScenario('budget')">
+                Start Negotiation →
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Agent Configuration</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="page-container">
+
+    <div class="header">
+
+        <div class="logo">
+            🤖 Agent Configuration
+        </div>
+
+        <p>
+            Configure the negotiation participants
+        </p>
+
+    </div>
+
+
+    <!-- Scenario information -->
+
+    <div class="selected-scenario">
+
+        <span>Selected Scenario</span>
+
+        <strong id="scenarioName">
+            Loading...
+        </strong>
+
+    </div>
+
+
+    <!-- Agents -->
+
+    <h2 class="section-title">
+        Negotiation Agents
+    </h2>
+
+    <div id="agents"
+         class="agent-grid">
+    </div>
+
+
+    <!-- Personality -->
+
+    <h2 class="section-title">
+        Choose Agent Personality
+    </h2>
+
+    <div class="personality-grid">
+
+        <div class="personality-card"
+             onclick="setPersonality(this,'Aggressive')">
+
+            <div class="personality-icon">
+                🔥
+            </div>
+
+            <h3>Aggressive</h3>
+
+            <p>
+                Pushes hard for the best possible deal.
+            </p>
+
+        </div>
+
+
+        <div class="personality-card"
+             onclick="setPersonality(this,'Collaborative')">
+
+            <div class="personality-icon">
+                🤝
+            </div>
+
+            <h3>Collaborative</h3>
+
+            <p>
+                Looks for a solution that benefits both sides.
+            </p>
+
+        </div>
+
+
+        <div class="personality-card"
+             onclick="setPersonality(this,'Risk-Averse')">
+
+            <div class="personality-icon">
+                🛡️
+            </div>
+
+            <h3>Risk-Averse</h3>
+
+            <p>
+                Avoids risky offers and prefers safe agreements.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <button class="primary-btn continue-btn"
+            onclick="goToReady()">
+
+        Continue to Negotiation →
+
+    </button>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
