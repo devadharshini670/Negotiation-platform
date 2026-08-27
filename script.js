@@ -4,6 +4,10 @@
 
 const scenarios = {
 
+    // ==================================================
+    // VENDOR PRICING
+    // ==================================================
+
     vendor: {
 
         title: "Vendor Pricing",
@@ -120,6 +124,10 @@ const scenarios = {
     },
 
 
+    // ==================================================
+    // JOB OFFER
+    // ==================================================
+
     job: {
 
         title: "Job Offer",
@@ -235,6 +243,10 @@ const scenarios = {
 
     },
 
+
+    // ==================================================
+    // PROJECT BUDGET
+    // ==================================================
 
     budget: {
 
@@ -360,12 +372,19 @@ const scenarios = {
 
 function selectScenario(type) {
 
-    localStorage.setItem("scenario", type);
+    localStorage.setItem(
+        "scenario",
+        type
+    );
 
     // Reset previous personality
-    localStorage.removeItem("personality");
 
-    window.location.href = "agents.html";
+    localStorage.removeItem(
+        "personality"
+    );
+
+    window.location.href =
+        "agents.html";
 }
 
 
@@ -387,16 +406,21 @@ if (agentsContainer) {
 
 
     // Safety check
+
     if (!data) {
 
-        window.location.href = "index.html";
+        window.location.href =
+            "index.html";
 
     } else {
 
-        // Scenario name
+        // Display selected scenario
 
         const scenarioName =
-            document.getElementById("scenarioName");
+            document.getElementById(
+                "scenarioName"
+            );
+
 
         if (scenarioName) {
 
@@ -406,46 +430,65 @@ if (agentsContainer) {
         }
 
 
+        // Get selected personality
+
+        const selectedPersonality =
+            localStorage.getItem(
+                "personality"
+            ) || "Not Selected";
+
+
         // Create agent cards
 
-        data.agents.forEach((agent, index) => {
+        data.agents.forEach(
+            (agent, index) => {
 
-            agentsContainer.innerHTML += `
+                agentsContainer.innerHTML += `
 
-                <div class="agent-card">
+                    <div class="agent-card">
 
-                    <div class="agent-number">
-                        Agent ${index + 1}
+                        <div class="agent-number">
+                            Agent ${index + 1}
+                        </div>
+
+                        <div class="agent-icon">
+                            ${index === 0
+                                ? "👤"
+                                : "🤖"}
+                        </div>
+
+                        <h3>
+                            ${agent.name}
+                        </h3>
+
+                        <p>
+                            <strong>Role:</strong>
+                            ${agent.role}
+                        </p>
+
+                        <p>
+                            <strong>Goal:</strong>
+                            ${agent.goal}
+                        </p>
+
+                        <p>
+                            <strong>Constraint:</strong>
+                            ${agent.constraint}
+                        </p>
+
+                        <p class="agent-personality">
+                            <strong>Personality:</strong>
+                            <span class="personality-value">
+                                ${selectedPersonality}
+                            </span>
+                        </p>
+
                     </div>
 
-                    <div class="agent-icon">
-                        ${index === 0 ? "👤" : "🤖"}
-                    </div>
+                `;
 
-                    <h3>
-                        ${agent.name}
-                    </h3>
-
-                    <p>
-                        <strong>Role:</strong>
-                        ${agent.role}
-                    </p>
-
-                    <p>
-                        <strong>Goal:</strong>
-                        ${agent.goal}
-                    </p>
-
-                    <p>
-                        <strong>Constraint:</strong>
-                        ${agent.constraint}
-                    </p>
-
-                </div>
-
-            `;
-
-        });
+            }
+        );
 
     }
 
@@ -456,24 +499,69 @@ if (agentsContainer) {
 // PERSONALITY
 // ======================================================
 
-function setPersonality(element, personality) {
+function setPersonality(
+    element,
+    personality
+) {
+
+    // Remove selected state
 
     document
-        .querySelectorAll(".personality-card")
+        .querySelectorAll(
+            ".personality-card"
+        )
         .forEach(card => {
 
-            card.classList.remove("selected");
+            card.classList.remove(
+                "selected"
+            );
 
         });
 
 
-    element.classList.add("selected");
+    // Highlight selected card
 
+    element.classList.add(
+        "selected"
+    );
+
+
+    // Save personality
 
     localStorage.setItem(
         "personality",
         personality
     );
+
+
+    // Update personality
+    // on all agent cards
+
+    updateAgentPersonality(
+        personality
+    );
+
+}
+
+
+// ======================================================
+// UPDATE AGENT PERSONALITY
+// ======================================================
+
+function updateAgentPersonality(
+    personality
+) {
+
+    document
+        .querySelectorAll(
+            ".personality-value"
+        )
+        .forEach(element => {
+
+            element.textContent =
+                personality;
+
+        });
 
 }
 
@@ -485,16 +573,27 @@ function setPersonality(element, personality) {
 function goToReady() {
 
     let personality =
-        localStorage.getItem("personality");
+        localStorage.getItem(
+            "personality"
+        );
 
 
     // Default personality
+
     if (!personality) {
 
-        personality = "Collaborative";
+        personality =
+            "Collaborative";
 
         localStorage.setItem(
             "personality",
+            personality
+        );
+
+
+        // Also update agent cards
+
+        updateAgentPersonality(
             personality
         );
 
@@ -503,37 +602,72 @@ function goToReady() {
 
     window.location.href =
         "ready.html";
-
 }
 
 
 // ======================================================
-// GET AGENTS
+// GET CURRENT SCENARIO
 // ======================================================
 
 function getCurrentScenario() {
 
-    return localStorage.getItem("scenario");
+    return localStorage.getItem(
+        "scenario"
+    );
 
 }
 
+
+// ======================================================
+// GET AGENT 1
+// ======================================================
 
 function getAgent1() {
 
     const key =
         getCurrentScenario();
 
-    return scenarios[key].agents[0].name;
+
+    if (
+        !key ||
+        !scenarios[key]
+    ) {
+
+        return "Agent 1";
+
+    }
+
+
+    return scenarios[key]
+        .agents[0]
+        .name;
 
 }
 
+
+// ======================================================
+// GET AGENT 2
+// ======================================================
 
 function getAgent2() {
 
     const key =
         getCurrentScenario();
 
-    return scenarios[key].agents[1].name;
+
+    if (
+        !key ||
+        !scenarios[key]
+    ) {
+
+        return "Agent 2";
+
+    }
+
+
+    return scenarios[key]
+        .agents[1]
+        .name;
 
 }
 
@@ -544,7 +678,8 @@ function getAgent2() {
 
 let chatStep = 0;
 
-let negotiationCompleted = false;
+let negotiationCompleted =
+    false;
 
 
 // ======================================================
@@ -565,12 +700,16 @@ function typeMessage(
 
     function typing() {
 
-        if (index < text.length) {
+        if (
+            index <
+            text.length
+        ) {
 
             element.textContent +=
                 text.charAt(index);
 
             index++;
+
 
             setTimeout(
                 typing,
@@ -606,14 +745,18 @@ function addMessage(
 ) {
 
     const chat =
-        document.getElementById("chatBox");
+        document.getElementById(
+            "chatBox"
+        );
 
 
     if (!chat) return;
 
 
     const message =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     message.className =
@@ -621,7 +764,9 @@ function addMessage(
 
 
     const avatar =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     avatar.className =
@@ -629,11 +774,15 @@ function addMessage(
 
 
     avatar.textContent =
-        side === "left" ? "👤" : "🤖";
+        side === "left"
+            ? "👤"
+            : "🤖";
 
 
     const content =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     content.className =
@@ -641,7 +790,9 @@ function addMessage(
 
 
     const sender =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     sender.className =
@@ -653,24 +804,36 @@ function addMessage(
 
 
     const textElement =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     textElement.className =
         "message-text";
 
 
-    content.appendChild(sender);
+    content.appendChild(
+        sender
+    );
 
-    content.appendChild(textElement);
+    content.appendChild(
+        textElement
+    );
 
 
-    message.appendChild(avatar);
+    message.appendChild(
+        avatar
+    );
 
-    message.appendChild(content);
+    message.appendChild(
+        content
+    );
 
 
-    chat.appendChild(message);
+    chat.appendChild(
+        message
+    );
 
 
     chat.scrollTop =
@@ -695,11 +858,18 @@ function showTyping(
 ) {
 
     const chat =
-        document.getElementById("chatBox");
+        document.getElementById(
+            "chatBox"
+        );
+
+
+    if (!chat) return;
 
 
     const typing =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     typing.id =
@@ -735,7 +905,9 @@ function showTyping(
     `;
 
 
-    chat.appendChild(typing);
+    chat.appendChild(
+        typing
+    );
 
 
     chat.scrollTop =
@@ -823,9 +995,13 @@ function startChat() {
     // Initial message
 
     addMessage(
+
         getAgent1(),
+
         "Hello! Let's work together and see if we can reach a good agreement.",
+
         "left"
+
     );
 
 }
@@ -837,7 +1013,9 @@ function startChat() {
 
 function nextMessage() {
 
-    if (negotiationCompleted) {
+    if (
+        negotiationCompleted
+    ) {
 
         return;
 
@@ -858,21 +1036,45 @@ function nextMessage() {
         scenarios[key];
 
 
+    if (!data) {
+
+        return;
+
+    }
+
+
     const messages =
-        data.messages[personality];
+        data.messages[
+            personality
+        ];
+
+
+    if (!messages) {
+
+        return;
+
+    }
 
 
     // Negotiation finished
 
-    if (chatStep >= messages.length) {
+    if (
+        chatStep >=
+        messages.length
+    ) {
 
-        negotiationCompleted = true;
+        negotiationCompleted =
+            true;
 
 
         addMessage(
+
             "System",
+
             "Negotiation completed successfully! 🎉",
+
             "system"
+
         );
 
 
@@ -970,7 +1172,8 @@ function restartNegotiation() {
 
     chatStep = 0;
 
-    negotiationCompleted = false;
+    negotiationCompleted =
+        false;
 
 
     const chat =
@@ -994,7 +1197,8 @@ function restartNegotiation() {
 
     if (button) {
 
-        button.disabled = false;
+        button.disabled =
+            false;
 
         button.textContent =
             "Generate Next Offer";
