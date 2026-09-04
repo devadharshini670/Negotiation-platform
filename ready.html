@@ -10,7 +10,8 @@
 
     <title>Negotiation Room</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet"
+          href="style.css">
 
 </head>
 
@@ -18,7 +19,8 @@
 
 <div class="chat-page">
 
-    <!-- Top bar -->
+
+    <!-- HEADER -->
 
     <div class="chat-header">
 
@@ -34,6 +36,7 @@
 
         </div>
 
+
         <button class="restart-btn"
                 onclick="restartNegotiation()">
 
@@ -44,27 +47,156 @@
     </div>
 
 
-    <!-- Chat -->
+    <!-- STATUS -->
 
-    <div id="chatBox"
-         class="chat-box">
+    <div class="negotiation-status-panel">
+
+
+        <div class="status-item">
+
+            <span>
+                Current Round
+            </span>
+
+            <strong id="roundDisplay">
+                1/5
+            </strong>
+
+        </div>
+
+
+        <div class="status-item">
+
+            <span>
+                Current Turn
+            </span>
+
+            <strong id="turnDisplay">
+                -
+            </strong>
+
+        </div>
+
+
+        <div class="status-item">
+
+            <span>
+                Status
+            </span>
+
+            <strong id="statusDisplay">
+                Not Started
+            </strong>
+
+        </div>
+
 
     </div>
 
 
-    <!-- Bottom controls -->
+    <!-- AGENT INFORMATION -->
+
+    <div id="agentInfo"
+         class="agent-info-panel">
+    </div>
+
+
+    <!-- METRICS -->
+
+    <div class="negotiation-metrics">
+
+
+        <div class="metric-card">
+
+            <span>
+                Total Offers
+            </span>
+
+            <strong id="metricOffers">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="metric-card">
+
+            <span>
+                Concessions
+            </span>
+
+            <strong id="metricConcessions">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="metric-card">
+
+            <span>
+                Negotiation Gap
+            </span>
+
+            <strong id="metricGap">
+                —
+            </strong>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- CHAT -->
+
+    <div id="chatBox"
+         class="chat-box">
+    </div>
+
+
+    <!-- OUTCOME -->
+
+    <div id="outcomePanel"
+         class="outcome-panel hidden">
+
+        <h2>
+            📊 Negotiation Outcome
+        </h2>
+
+        <div id="outcomeContent">
+        </div>
+
+    </div>
+
+
+    <!-- CONTROLS -->
 
     <div class="chat-controls">
 
+        <div id="stateInfo"
+             class="state-info">
+
+            Negotiation State: Not Started
+
+        </div>
+
+
+        <!--
+            The negotiation is autonomous.
+            This button is intentionally disabled.
+        -->
+
         <button id="nextBtn"
                 class="offer-btn"
-                onclick="nextMessage()">
+                disabled>
 
-            Generate Next Offer
+            🤖 Autonomous Negotiation
 
         </button>
 
     </div>
+
 
 </div>
 
@@ -72,4 +204,5 @@
 <script src="script.js"></script>
 
 </body>
+
 </html>

@@ -1,77 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Negotiation AI - Scenario</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet"
+          href="style.css">
+
 </head>
 
 <body>
 
 <div class="page-container">
 
+    <!-- HEADER -->
+
     <div class="header">
-        <div class="logo">🤝 Negotiation AI</div>
-        <p>Choose a scenario to begin your negotiation</p>
+
+        <div class="logo">
+            🤝 Negotiation AI
+        </div>
+
+        <p>
+            Choose a scenario to begin your negotiation
+        </p>
+
     </div>
+
+
+    <!-- SCENARIO GRID -->
 
     <div class="scenario-grid">
 
-        <div class="scenario-card">
-            <div class="icon">🏪</div>
 
-            <h2>Vendor Pricing</h2>
+        <!-- VENDOR -->
+
+        <div class="scenario-card">
+
+            <div class="icon">
+                🏪
+            </div>
+
+            <h2>
+                Vendor Pricing
+            </h2>
 
             <p>
                 Negotiate product pricing between a buyer and vendor.
             </p>
 
+            <div class="scenario-details">
+
+                <span>💰 Price Negotiation</span>
+
+                <span>👥 2 Agents</span>
+
+            </div>
+
             <button class="primary-btn"
                     onclick="selectScenario('vendor')">
+
                 Start Negotiation →
+
             </button>
+
         </div>
 
 
-        <div class="scenario-card">
-            <div class="icon">💼</div>
+        <!-- JOB -->
 
-            <h2>Job Offer</h2>
+        <div class="scenario-card">
+
+            <div class="icon">
+                💼
+            </div>
+
+            <h2>
+                Job Offer
+            </h2>
 
             <p>
                 Negotiate salary and compensation between a candidate and HR.
             </p>
 
+            <div class="scenario-details">
+
+                <span>💰 Salary Negotiation</span>
+
+                <span>👥 2 Agents</span>
+
+            </div>
+
             <button class="primary-btn"
                     onclick="selectScenario('job')">
+
                 Start Negotiation →
+
             </button>
+
         </div>
 
 
-        <div class="scenario-card">
-            <div class="icon">📊</div>
+        <!-- PROJECT -->
 
-            <h2>Project Budget</h2>
+        <div class="scenario-card">
+
+            <div class="icon">
+                📊
+            </div>
+
+            <h2>
+                Project Budget
+            </h2>
 
             <p>
                 Negotiate project funding between a manager and finance team.
             </p>
 
+            <div class="scenario-details">
+
+                <span>💰 Budget Negotiation</span>
+
+                <span>👥 2 Agents</span>
+
+            </div>
+
             <button class="primary-btn"
                     onclick="selectScenario('budget')">
+
                 Start Negotiation →
+
             </button>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- SYSTEM INFORMATION -->
+
+    <div class="system-info">
+
+        <div>
+            <strong>⚙️ Rule-Based Engine</strong>
+            <span>State-driven negotiation</span>
+        </div>
+
+        <div>
+            <strong>🧠 Multi-Agent</strong>
+            <span>Individual personalities</span>
+        </div>
+
+        <div>
+            <strong>📈 Dynamic Rounds</strong>
+            <span>3–10 rounds</span>
         </div>
 
     </div>
 
 </div>
 
+
 <script src="script.js"></script>
 
 </body>
+
 </html>

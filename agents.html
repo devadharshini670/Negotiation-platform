@@ -10,13 +10,17 @@
 
     <title>Agent Configuration</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet"
+          href="style.css">
 
 </head>
 
 <body>
 
 <div class="page-container">
+
+
+    <!-- HEADER -->
 
     <div class="header">
 
@@ -31,11 +35,13 @@
     </div>
 
 
-    <!-- Scenario information -->
+    <!-- SELECTED SCENARIO -->
 
     <div class="selected-scenario">
 
-        <span>Selected Scenario</span>
+        <span>
+            Selected Scenario
+        </span>
 
         <strong id="scenarioName">
             Loading...
@@ -44,7 +50,7 @@
     </div>
 
 
-    <!-- Agents -->
+    <!-- AGENTS -->
 
     <h2 class="section-title">
         Negotiation Agents
@@ -55,63 +61,156 @@
     </div>
 
 
-    <!-- Personality -->
+    <!-- PERSONALITY -->
 
     <h2 class="section-title">
         Choose Agent Personality
     </h2>
 
-    <div class="personality-grid">
+    <p class="personality-instruction">
+        Select a personality individually for each negotiation agent.
+    </p>
 
-        <div class="personality-card"
-             onclick="setPersonality(this,'Aggressive')">
 
-            <div class="personality-icon">
+    <div id="personalityContainer"
+         class="personality-agent-container">
+    </div>
+
+
+    <!-- NEGOTIATION SETTINGS -->
+
+    <h2 class="section-title">
+        Negotiation Settings
+    </h2>
+
+    <p class="personality-instruction">
+        Choose how many rounds the negotiation can continue.
+    </p>
+
+
+    <div class="negotiation-settings">
+
+
+        <!-- 3 -->
+
+        <div class="round-option"
+             data-rounds="3"
+             onclick="selectRoundPreset(3, this)">
+
+            <div class="round-option-icon">
+                ⚡
+            </div>
+
+            <strong>
+                Quick
+            </strong>
+
+            <span>
+                3 Rounds
+            </span>
+
+        </div>
+
+
+        <!-- 5 -->
+
+        <div class="round-option"
+             data-rounds="5"
+             onclick="selectRoundPreset(5, this)">
+
+            <div class="round-option-icon">
+                ⚖️
+            </div>
+
+            <strong>
+                Standard
+            </strong>
+
+            <span>
+                5 Rounds
+            </span>
+
+        </div>
+
+
+        <!-- 8 -->
+
+        <div class="round-option"
+             data-rounds="8"
+             onclick="selectRoundPreset(8, this)">
+
+            <div class="round-option-icon">
                 🔥
             </div>
 
-            <h3>Aggressive</h3>
+            <strong>
+                Extended
+            </strong>
 
-            <p>
-                Pushes hard for the best possible deal.
-            </p>
-
-        </div>
-
-
-        <div class="personality-card"
-             onclick="setPersonality(this,'Collaborative')">
-
-            <div class="personality-icon">
-                🤝
-            </div>
-
-            <h3>Collaborative</h3>
-
-            <p>
-                Looks for a solution that benefits both sides.
-            </p>
+            <span>
+                8 Rounds
+            </span>
 
         </div>
 
 
-        <div class="personality-card"
-             onclick="setPersonality(this,'Risk-Averse')">
+        <!-- CUSTOM -->
 
-            <div class="personality-icon">
-                🛡️
+        <div class="round-custom">
+
+            <div class="round-option-icon">
+                ⚙️
             </div>
 
-            <h3>Risk-Averse</h3>
+            <label for="customRounds">
+                Custom
+            </label>
 
-            <p>
-                Avoids risky offers and prefers safe agreements.
-            </p>
+            <input
+                type="number"
+                id="customRounds"
+                min="3"
+                max="10"
+                placeholder="3 - 10"
+                onchange="setCustomRounds()"
+            >
+
+            <small>
+                Maximum 10 rounds
+            </small>
+
+        </div>
+
+
+    </div>
+
+
+    <div id="roundSelectionInfo"
+         class="round-selection-info">
+
+        Negotiation length: 5 rounds
+
+    </div>
+
+
+    <!-- CONFIGURATION SUMMARY -->
+
+    <div class="configuration-summary">
+
+        <h3>
+            ⚙️ Configuration Summary
+        </h3>
+
+        <div id="configurationSummary">
+
+            Select both personalities and negotiation length.
 
         </div>
 
     </div>
 
+
+    <!-- CONTINUE -->
 
     <button class="primary-btn continue-btn"
             onclick="goToReady()">
@@ -120,9 +219,12 @@
 
     </button>
 
+
 </div>
+
 
 <script src="script.js"></script>
 
 </body>
+
 </html>
