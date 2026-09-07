@@ -3430,9 +3430,92 @@ function generateNegotiationMessage(
 }
 
 
-//  ORCHESTRATOR
+function createAgentInputStructure(state, agentNumber) {
 
+    if (!state) {
+        return null;
+    }
+
+    const data = scenarios[state.scenario];
+
+    if (!data || !data.agents[agentNumber - 1]) {
+        return null;
+    }
+
+    const agent = data.agents[agentNumber - 1];
+    const opponentAgentNumber = agentNumber === 1 ? 2 : 1;
+
+    return {
+    agentNumber: agentNumber,
+    agentPersona: state.agentPersonality[`agent${agentNumber}`],
+    role: agent.role,
+    goals: agent.goal,
+    constraints: agent.constraint,
+    currentNegotiationState: state,
+    previousConversationHistory: state.negotiationHistory,
+    currentOpponentOffer: getLastOffer(state, opponentAgentNumber)
+};
+}
+function generate_agent_response(
+    agent_profile,
+    negotiation_state,
+    history
+) {
+
+    if (
+        !agent_profile ||
+        !negotiation_state
+    ) {
+        return null;
+    }
+
+    const agentNumber =
+        agent_profile.agentNumber;
+
+    if (
+        agentNumber !== 1 &&
+        agentNumber !== 2
+    ) {
+        return null;
+    }
+
+    const offerValue =
+        createOffer(
+            negotiation_state,
+            agentNumber
+        );
+
+    const previous =
+        getLastOffer(
+            negotiation_state,
+            agentNumber
+        );
+
+    const type =
+        previous === null ||
+        previous === undefined
+            ? "initial"
+            : "counter";
+
+    const message =
+        generateNegotiationMessage(
+            negotiation_state,
+            agentNumber,
+            offerValue,
+            type
+        );
+
+    return {
+        agentNumber: agentNumber,
+        offerValue: offerValue,
+        message: message,
+        type: type,
+        history: history || []
+    };
+}
+// ORCHESTRATOR
 const Orchestrator = {
+
 
     getCurrentAgent(state) {
 
@@ -3469,7 +3552,31 @@ const Orchestrator = {
             : 1;
 
     },
+        buildAgentInput(state) {
 
+        const agentNumber =
+            this.getCurrentAgent(state);
+
+        return createAgentInputStructure(
+            state,
+            agentNumber
+        );
+
+    },
+
+
+    getAgentResponse(state) {
+
+        const agentInput =
+            this.buildAgentInput(state);
+
+        return generate_agent_response(
+            agentInput,
+            state,
+            state.negotiationHistory
+        );
+
+    },
 
     nextTurn(state) {
 
@@ -4428,37 +4535,32 @@ function nextMessage() {
         ];
 
 
-    const offerValue =
-        createOffer(
-            state,
-            agentNumber
-        );
+        const response =
+    Orchestrator.getAgentResponse(
+        state
+    );
 
 
-    const previous =
-        getLastOffer(
-            state,
-            agentNumber
-        );
+if (!response) {
+
+    processingMessage =
+        false;
+
+    return;
+
+}
 
 
-    const type =
-        previous === null ||
-        previous === undefined
-
-            ? "initial"
-
-            : "counter";
+const offerValue =
+    response.offerValue;
 
 
-    const text =
-        generateNegotiationMessage(
-            state,
-            agentNumber,
-            offerValue,
-            type
-        );
+const type =
+    response.type;
 
+
+const text =
+    response.message;
 
     const side =
         agentNumber === 1
