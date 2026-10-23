@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign in — AI Multi-Agent Negotiation Platform</title>
+<link rel="stylesheet" href="style.css"><script src="api.js"></script></head>
+<body class="auth-shell"><script>document.write(authHeader())</script>
+<script>
+/* Intro screen from the brand artwork: plays once per browser session, never with reduced motion, click/key skips it. */
+window.__splash = false;
+try { window.__splash = !sessionStorage.getItem('np_splash') && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); sessionStorage.setItem('np_splash', '1'); } catch { }
+if (window.__splash) {
+  document.body.classList.add('splashing');
+  document.write(`<div class="splash" id="splash" aria-hidden="true">${logoFull({ animate: true, width: 300 })}<h1 class="sp-title">Multi-Agent</h1><div class="sp-sub">AI Negotiation Platform</div>
+    <div class="sp-tags"><span>Intelligent Agents</span><i></i><span>Transparent Negotiation</span><i></i><span>Better Outcomes</span></div>
+    <div class="sp-bar"><b></b></div><div class="sp-cap">Initializing AI Agents…</div></div>`);
+}
+</script>
+<main id="main"><div class="auth-wrap"><div class="auth-card">
+  <div class="auth-hero-logo"><script>document.write(logoFull({ animate: !window.__splash, width: 128 }))</script></div>
+  <h1>Welcome back</h1><p class="sub">Sign in to continue negotiating.</p>
+  <div id="msg"></div>
+  <form id="form" novalidate>
+    <div class="auth-field"><label for="email">Email</label><input id="email" type="email" name="email" autocomplete="username" required></div>
+    <div class="auth-field"><label for="password">Password</label><input id="password" type="password" name="password" autocomplete="current-password" required></div>
+    <button class="btn auth-submit" id="submit" type="submit">Sign in</button>
+  </form>
+  <form id="mfaForm" novalidate hidden>
+    <div class="auth-field"><label for="code">Authentication code</label><input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code or a recovery code" required>
+      <div class="auth-hint">Open your authenticator app and enter the current code. Lost your phone? Use one of your recovery codes.</div></div>
+    <button class="btn auth-submit" id="mfaSubmit" type="submit">Verify</button>
+  </form>
+  <div id="primary">
+  <p class="auth-switch"><a href="forgot-password.html">Forgot your password?</a></p>
+  <script>document.write(oauthBlock())</script>
+  <p class="auth-switch">New here? <a href="register.html">Create an account</a></p>
+  </div>
+</div></div></main>
+<script>
+/* Short error codes from the OAuth callback (…/login.html?error=google_cancelled) are mapped to fixed,
+   friendly messages here — raw provider or server text is never shown. */
+const OAUTH_ERRORS = {
+  google_cancelled: 'Google sign-in was cancelled.',
+  github_cancelled: 'GitHub sign-in was cancelled.',
+  google_failed: 'Google sign-in could not be completed. Please try again.',
+  github_failed: 'GitHub sign-in could not be completed. Please try again.',
+  google_email_unverified: 'Your Google account has no verified email address, so we could not sign you in with it.',
+  github_email_unverified: 'Your GitHub account has no verified email address. Verify one in your GitHub settings and try again.',
+  google_not_configured: 'Google sign-in is not available right now.',
+  github_not_configured: 'GitHub sign-in is not available right now.'
+};
+function endSplash() {
+  const sp = document.getElementById('splash'); if (!sp || sp.classList.contains('out')) return;
+  sp.classList.add('out'); document.body.classList.remove('splashing'); setTimeout(() => sp.remove(), 700);
+}
+if (window.__splash) { setTimeout(endSplash, 4100); ['click', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, endSplash, { once: true })); }
+const params = new URLSearchParams(location.search);
+const nextParam = params.get('next');
+const nextPath = (nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')) ? nextParam : null;
+
+if (params.has('error')) {
+  const text = OAUTH_ERRORS[params.get('error')] || 'Unable to complete sign-in. Please try again.';
+  document.getElementById('msg').innerHTML = `<div class="auth-error">${esc(text)}</div>`;
+  params.delete('error');
+  history.replaceState(null, '', location.pathname + (params.toString() ? '?' + params : ''));
+}
+
+(async () => { if ((await Api.auth.me()).authenticated) location.href = 'index.html'; })();
+initOAuthBlock(nextPath);
+const goNext = () => { location.href = nextPath ? nextPath.slice(1) : 'index.html'; };
+function showMfa() {
+  document.getElementById('form').hidden = true; document.getElementById('primary').hidden = true;
+  document.getElementById('mfaForm').hidden = false; document.querySelector('.sub').textContent = 'Two-factor authentication is on for this account.';
+  document.getElementById('code').focus();
+}
+if (params.get('mfa') === '1') { params.delete('mfa'); history.replaceState(null, '', location.pathname + (params.toString() ? '?' + params : '')); showMfa(); }
+document.getElementById('mfaForm').onsubmit = async e => {
+  e.preventDefault();
+  const msg = document.getElementById('msg'); msg.innerHTML = '';
+  const btn = document.getElementById('mfaSubmit'); btn.disabled = true; btn.textContent = 'Verifying…';
+  try { await Api.auth.verify2fa(document.getElementById('code').value.trim()); goNext(); }
+  catch (err) { msg.innerHTML = `<div class="auth-error">${esc(err.message)}</div>`; btn.disabled = false; btn.textContent = 'Verify'; if (err.status === 401 && /expired/i.test(err.message)) setTimeout(() => location.reload(), 1500); }
+};
+
+document.getElementById('form').onsubmit = async e => {
+  e.preventDefault();
+  const msg = document.getElementById('msg'); msg.innerHTML = '';
+  const btn = document.getElementById('submit'); btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const r = await Api.auth.login(document.getElementById('email').value.trim(), document.getElementById('password').value);
+    if (r.mfa_required) { showMfa(); return; }
+    goNext();
+  } catch (err) {
+    msg.innerHTML = `<div class="auth-error">${esc(err.message)}</div>`;
+    btn.disabled = false; btn.textContent = 'Sign in';
+  }
+};
+</script></body></html>

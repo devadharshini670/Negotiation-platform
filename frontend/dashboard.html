@@ -1,3 +1,32 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Insights — The Table</title><link rel="stylesheet" href="style.css"><script src="api.js"></script></head><body><script>document.write(nav('dash'))</script><main><div class="wrap"><div class="eyebrow">Operations intelligence</div><h1 class="page-title">Negotiation insights.</h1><p class="page-sub">Live metrics derived from the negotiation engine. No hard-coded dashboard numbers.</p><div class="dashboard-grid" id="stats"></div><div class="section-head"><div><h2>Recent sessions</h2><p>Every run created by this backend process.</p></div><a class="btn" href="index.html">New negotiation →</a></div><div class="card history"><table><thead><tr><th>Scenario</th><th>Participants</th><th>Engine</th><th>Status</th><th>Result</th><th>Rounds</th></tr></thead><tbody id="rows"></tbody></table></div></div></main><script>
-(async()=>{try{const [d,h]=await Promise.all([Api.dashboard(),Api.history()]);document.getElementById('stats').innerHTML=[['Total negotiations',d.total_negotiations],['Agreements',d.agreements],['Agreement rate',d.agreement_rate_pct+'%'],['Average rounds',d.avg_rounds],['Active',d.active],['LLM runs',d.llm_runs],['Fallback events',d.fallbacks],['Completed',d.completed]].map(x=>`<div class="card stat"><label>${x[0]}</label><b>${x[1]}</b></div>`).join('');document.getElementById('rows').innerHTML=h.length?h.map(x=>`<tr><td><strong>${esc(x.scenario_name)}</strong></td><td>${x.agents.map(a=>esc(a.role_label)).join(' · ')}</td><td>${x.mode==='llm'?'Live LLM':'Mock'}</td><td><span class="status ${x.status}">${x.status.replaceAll('_',' ')}</span></td><td>${x.final_value!=null?money(x.final_value,x.unit):'—'}</td><td>${x.rounds_used}/${x.max_rounds}</td></tr>`).join(''):`<tr><td colspan="6" class="empty">No sessions yet. Start your first negotiation.</td></tr>`}catch(e){document.getElementById('rows').innerHTML=`<tr><td colspan="6" class="empty">Backend unavailable. Start Flask and reload.</td></tr>`}})();Api.health().then(h=>{const b=document.getElementById('engineBadge');b.innerHTML=`<i></i> ${h.llm.configured?'Live LLM ready':'Mock engine ready'}`;if(h.llm.configured)b.classList.add('live')})
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Negotiation Analytics — AI Multi-Agent Negotiation Platform</title>
+<link rel="stylesheet" href="style.css"><script src="api.js"></script></head>
+<body><script>document.write(nav('dash'))</script>
+<main id="main"><div class="wrap">
+<div class="eyebrow">Platform analytics</div>
+<h1 class="page-title">Negotiation Analytics.</h1>
+<p class="page-sub">Anonymous, platform-wide metrics across every account. Nothing on this page is hard-coded.</p>
+<div class="dashboard-grid" id="stats"></div>
+<div class="card" style="padding:22px;margin-top:18px"><h3 style="font-family:var(--sans);margin:0 0 4px">Outcome breakdown</h3><p class="lead" style="color:#66757e;font-size:13.5px;margin:0 0 10px">How completed negotiations ended, across all accounts.</p><div class="stat-bars" id="breakdown"></div></div>
+<div class="section-head"><div><h2>Leaderboard</h2><p>Ranked by Negotiation Skill Score from Practice Mode sessions. Only usernames and scores are shown — never session details.</p></div><a class="btn secondary" href="my-negotiations.html">Your stats →</a></div>
+<div class="card" style="overflow-x:auto"><table class="leaderboard-table"><thead><tr><th>Rank</th><th>Negotiator</th><th>Avg. score</th><th>Best</th><th>Completed</th><th>Badges</th></tr></thead><tbody id="board"></tbody></table></div>
+</div></main>
+<script>
+(async () => {
+  const user = await authGuard(); if (!user) return;
+  try {
+    const [d, board] = await Promise.all([Api.dashboard(), Api.leaderboard()]);
+    document.getElementById('stats').innerHTML = [['Total negotiations', d.total_negotiations], ['Agreements', d.agreements], ['Agreement rate', d.agreement_rate_pct + '%'], ['Average rounds', d.avg_rounds],
+      ['Active', d.active], ['Simulation · Practice', `${d.simulations} · ${d.practice_sessions}`], ['Avg. satisfaction', d.avg_satisfaction != null ? d.avg_satisfaction + '/100' : '—'], ['LLM runs · fallbacks', `${d.llm_runs} · ${d.fallbacks}`]]
+      .map(x => `<div class="card stat"><label>${x[0]}</label><b>${x[1]}</b></div>`).join('');
+    const tot = Object.values(d.status_breakdown).reduce((a, b) => a + b, 0);
+    document.getElementById('breakdown').innerHTML = tot ? Object.entries(d.status_breakdown).map(([k, v]) => `<div class="sb"><span>${esc(STATUS[k] || k)}</span><div class="bar"><span style="width:${v / tot * 100}%"></span></div><b>${v}</b></div>`).join('') : '<div class="empty" style="padding:10px">No completed negotiations yet.</div>';
+    document.getElementById('board').innerHTML = board.length ? board.map((r, i) => {
+      const rank = i + 1, cls = rank <= 3 ? ` top${rank}` : '';
+      return `<tr class="${r.username === user.username ? 'me' : ''}"><td><span class="rank${cls}">${rank}</span></td><td>${esc(r.username)}${r.username === user.username ? ' <small>(you)</small>' : ''}</td><td><b>${r.average_score}</b>/100</td><td>${r.best_score}/100</td><td>${r.completed}</td><td>${r.badge_count}</td></tr>`;
+    }).join('') : '<tr><td colspan="6" class="empty">No Practice Mode negotiations completed yet. <a href="index.html">Start one</a>.</td></tr>';
+  } catch (e) { document.getElementById('board').innerHTML = `<tr><td colspan="6" class="empty">${esc(e.message)}</td></tr>`; }
+})();
+engineBadge();
 </script></body></html>

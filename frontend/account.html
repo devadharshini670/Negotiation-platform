@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Account settings — AI Multi-Agent Negotiation Platform</title>
+<link rel="stylesheet" href="style.css"><script src="api.js"></script></head>
+<body><script>document.write(nav(''))</script>
+<main id="main"><div class="wrap">
+<div class="eyebrow">Your account</div>
+<h1 class="page-title">Account settings.</h1>
+<p class="page-sub" id="sub">Manage how you sign in, protect your account, and control your data.</p>
+<div class="out-grid">
+  <section class="card"><h3>Profile</h3><p class="lead" id="emailLine"></p>
+    <div id="msgProfile"></div>
+    <form class="acct-form" id="usernameForm" novalidate>
+      <div class="auth-field"><label for="username">Username</label><input id="username" autocomplete="username" maxlength="24" required><div class="auth-hint">Shown on the leaderboard. 3–24 characters: letters, numbers, underscore.</div></div>
+      <button class="btn small" type="submit">Save username</button>
+    </form></section>
+
+  <section class="card"><h3>Sign-in methods</h3><p class="lead">Ways you can get into this account.</p>
+    <div id="msgMethods"></div><div id="methods"></div>
+    <form class="acct-form" id="passwordForm" novalidate>
+      <div class="auth-field" id="currentWrap"><label for="curPw">Current password</label><input id="curPw" type="password" autocomplete="current-password"></div>
+      <div class="auth-field"><label for="newPw" id="newPwLabel">New password</label><input id="newPw" type="password" autocomplete="new-password" minlength="8"><div class="auth-hint">At least 8 characters, with a letter and a number.</div></div>
+      <button class="btn small secondary" id="pwBtn" type="submit">Update password</button>
+    </form>
+    <p class="auth-hint" style="margin-top:12px">To connect another provider, sign in with it using this account's verified email — it links automatically.</p></section>
+
+  <section class="card"><h3>Two-factor authentication</h3><p class="lead" id="tfaLead"></p>
+    <div id="msgTfa"></div><div id="tfa"></div></section>
+
+  <section class="card"><h3>Your data</h3><p class="lead">Download everything the platform holds about you.</p>
+    <p>A JSON file with your account details, skill score and every negotiation you ran.</p>
+    <div id="msgExport"></div><button class="btn small secondary" id="exportBtn" type="button">Download my data</button></section>
+
+  <section class="card wide danger-card"><h3>Delete account</h3><p class="lead">This permanently removes your account, sign-in methods and all your negotiations. It cannot be undone.</p>
+    <div id="msgDelete"></div>
+    <form class="acct-form" id="deleteForm" novalidate style="max-width:420px">
+      <div class="auth-field"><label for="delName">Type your username to confirm</label><input id="delName" autocomplete="off" required></div>
+      <div class="auth-field" id="delPwWrap"><label for="delPw">Password</label><input id="delPw" type="password" autocomplete="current-password"></div>
+      <div class="auth-field" id="delCodeWrap" hidden><label for="delCode">Two-factor or recovery code</label><input id="delCode" autocomplete="one-time-code"></div>
+      <button class="btn small danger" type="submit">Delete my account</button>
+    </form></section>
+</div></div></main>
+<script>
+const flash = (id, kind, text) => { document.getElementById(id).innerHTML = text ? `<div class="auth-${kind}">${esc(text)}</div>` : ''; };
+const $ = id => document.getElementById(id);
+let acct = null;
+
+async function load() {
+  acct = await Api.account.get();
+  $('emailLine').textContent = acct.email; $('username').value = acct.username;
+  // sign-in methods
+  const rows = [`<div class="acct-row"><div>Password<small>${acct.has_password ? 'Email + password sign-in is on' : 'Not set — you sign in with a connected provider'}</small></div></div>`];
+  for (const p of ['google', 'github']) {
+    const id = acct.identities.find(i => i.provider === p), label = p === 'google' ? 'Google' : 'GitHub';
+    rows.push(`<div class="acct-row"><div>${label}<small>${id ? 'Connected' : 'Not connected'}</small></div>${id ? `<button class="btn small secondary" data-unlink="${p}" type="button">Disconnect</button>` : ''}</div>`);
+  }
+  $('methods').innerHTML = rows.join('');
+  $('currentWrap').hidden = !acct.has_password;
+  $('newPwLabel').textContent = acct.has_password ? 'New password' : 'Set a password';
+  $('pwBtn').textContent = acct.has_password ? 'Update password' : 'Set password';
+  document.querySelectorAll('[data-unlink]').forEach(b => b.onclick = async () => {
+    if (!confirm('Disconnect ' + b.dataset.unlink + ' from this account?')) return;
+    try { await Api.account.unlink(b.dataset.unlink); flash('msgMethods', 'success', 'Sign-in method disconnected.'); await load(); }
+    catch (e) { flash('msgMethods', 'error', e.message); }
+  });
+  // two-factor
+  const tf = acct.two_factor;
+  $('tfaLead').textContent = tf.enabled ? 'On — a code from your authenticator app is required at sign-in.' : 'Off — add a second step to sign-in with an authenticator app.';
+  $('delCodeWrap').hidden = !tf.enabled; $('delPwWrap').hidden = !acct.has_password;
+  $('tfa').innerHTML = tf.enabled
+    ? `<p class="auth-hint">${tf.recovery_codes_left} recovery code(s) left.</p><form class="acct-form" id="tfaOff" novalidate><div class="auth-field"><label for="offCode">Enter a code to turn it off</label><input id="offCode" autocomplete="one-time-code" required></div><button class="btn small secondary" type="submit">Turn off two-factor</button></form>`
+    : `<button class="btn small" id="tfaStart" type="button">Set up two-factor</button>`;
+  if (tf.enabled) $('tfaOff').onsubmit = async e => { e.preventDefault();
+    try { await Api.account.tfaDisable($('offCode').value.trim()); flash('msgTfa', 'success', 'Two-factor authentication turned off.'); await load(); } catch (er) { flash('msgTfa', 'error', er.message); } };
+  else $('tfaStart').onclick = startTfa;
+}
+
+async function startTfa() {
+  try {
+    const s = await Api.account.tfaSetup();
+    $('tfa').innerHTML = `<p>Scan this QR code with an authenticator app (Google Authenticator, 1Password, Authy…), then enter the 6-digit code it shows.</p>
+      <div class="qr-box">${s.qr_svg}<div><div class="auth-hint">Can't scan? Enter this key manually:</div><div class="secret-key">${esc(s.secret)}</div></div></div>
+      <form class="acct-form" id="tfaOn" novalidate><div class="auth-field"><label for="onCode">6-digit code</label><input id="onCode" inputmode="numeric" autocomplete="one-time-code" required></div><button class="btn small" type="submit">Turn on two-factor</button></form>`;
+    $('tfaOn').onsubmit = async e => { e.preventDefault();
+      try {
+        const r = await Api.account.tfaEnable($('onCode').value.trim());
+        flash('msgTfa', 'success', 'Two-factor authentication is on. Save these recovery codes now — they are shown only once.');
+        $('tfa').innerHTML = `<div class="recovery-list">${r.recovery_codes.map(c => `<span>${esc(c)}</span>`).join('')}</div><p class="auth-hint">Each code works once if you lose access to your authenticator app.</p><button class="btn small secondary" id="tfaDone" type="button">I've saved them</button>`;
+        $('tfaDone').onclick = () => { flash('msgTfa', '', ''); load(); };
+        $('tfaLead').textContent = 'On — a code from your authenticator app is required at sign-in.';
+      } catch (er) { flash('msgTfa', 'error', er.message); } };
+  } catch (e) { flash('msgTfa', 'error', e.message); }
+}
+
+$('usernameForm').onsubmit = async e => { e.preventDefault(); flash('msgProfile', '', '');
+  try { const r = await Api.account.username($('username').value.trim()); flash('msgProfile', 'success', 'Username updated.'); const u = await authGuard(); } catch (er) { flash('msgProfile', 'error', er.message); } };
+$('passwordForm').onsubmit = async e => { e.preventDefault(); flash('msgMethods', '', '');
+  try { await Api.account.password($('curPw').value, $('newPw').value); $('curPw').value = $('newPw').value = ''; flash('msgMethods', 'success', 'Password updated.'); await load(); }
+  catch (er) { flash('msgMethods', 'error', er.message); } };
+$('exportBtn').onclick = async () => { flash('msgExport', '', ''); try { await download('/account/export', 'negotiation-account.json'); } catch (e) { flash('msgExport', 'error', e.message); } };
+$('deleteForm').onsubmit = async e => { e.preventDefault(); flash('msgDelete', '', '');
+  if (!confirm('Permanently delete your account and all your negotiations?')) return;
+  try { await Api.account.remove($('delName').value.trim(), $('delPw').value, $('delCode').value.trim()); Session.clear(); location.href = 'login.html'; }
+  catch (er) { flash('msgDelete', 'error', er.message); } };
+
+(async () => { if (!(await authGuard())) return; try { await load(); } catch (e) { flash('msgProfile', 'error', e.message); } })();
+</script></body></html>

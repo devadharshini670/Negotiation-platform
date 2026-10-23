@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Negotiation Outcome — AI Multi-Agent Negotiation Platform</title>
+<link rel="stylesheet" href="style.css"><script src="api.js"></script></head>
+<body><script>document.write(nav('home'))</script>
+<main id="main"><div class="wrap">
+<div class="eyebrow">Step 05 · Negotiation Outcome</div>
+<h1 class="page-title">Negotiation Outcome</h1>
+<p class="page-sub" id="sub">Loading results…</p>
+<div id="content" aria-live="polite"><div class="empty">Loading…</div></div>
+</div></main>
+<script>
+const qid = new URLSearchParams(location.search).get('id') || Session.get().negotiationId;
+const toast = m => { const t = Object.assign(document.createElement('div'), { className: 'toast', textContent: m, role: 'status' }); document.body.appendChild(t); setTimeout(() => t.remove(), 3800); };
+
+const HEAD = { agreed: 'Agreement reached', rejected: 'Negotiation rejected', deadlock: 'Deadlock — no agreement', completed: 'Negotiation completed', max_rounds_reached: 'Maximum rounds reached — no agreement', in_progress: 'Negotiation still in progress', not_started: 'Negotiation not started' };
+
+function whoLabel(e) { return e.controlled_by === 'human' ? `${esc(e.role)} (You)` : esc(e.role); }
+
+function satisfactionBlock(r) {
+  const an = r.analysis;
+  const bars = an.agents.map((e, i) => {
+    const s = e.satisfaction;
+    return `<div class="sat"><div class="row"><span><b>${whoLabel(e)}</b> · ${esc(e.personality_label)}</span><b>${s == null ? 'n/a' : s + ' / 100'}</b></div><div class="bar ${i ? 'b1' : ''}"><span style="width:${s || 0}%"></span></div><small>${an.status === 'agreed' ? `Final position ${esc(money(e.final_position, r.unit))}${e.target_met != null ? ' · target ' + (e.target_met ? 'met' : 'not met') : ''}` : 'No agreement — objectives unmet'}${e.target != null ? ` · target ${esc(money(e.target, r.unit))} · hard limit ${esc(money(e.hard_limit, r.unit))}` : ''}</small></div>`;
+  }).join('');
+  let extra = '';
+  if (an.surplus && an.surplus.shares) {
+    const [a0, a1] = an.agents, s0 = an.surplus.shares[a0.id], s1 = an.surplus.shares[a1.id];
+    extra += `<div style="margin-top:18px"><b style="font-size:13.5px">Share of the bargaining zone (${esc(money(an.surplus.zone_low, r.unit))} – ${esc(money(an.surplus.zone_high, r.unit))})</b><div class="split" role="img" aria-label="Surplus split"><span class="s0" style="width:${s0}%"></span><span class="s1" style="width:${s1}%"></span></div><small style="color:#6d7c85">${esc(a0.role)} ${s0}% · ${esc(a1.role)} ${s1}%</small></div>`;
+  }
+  if (an.joint) extra += `<p style="margin:14px 0 0;font-size:13.5px;color:#4f626c">Average satisfaction <b>${an.joint.average_satisfaction}</b>/100 · balance <b>${an.joint.balance}</b>/100 (100 = perfectly even)</p>`;
+  return bars + extra;
+}
+
+function termsBlock(r) {
+  const an = r.analysis;
+  if (an.status !== 'agreed') return `<p class="lead">No agreement was reached.</p><p style="margin:0">${esc(an.outcome_reason || '')}</p><table class="terms" style="margin-top:14px"><thead><tr><th>Participant</th><th>Last position</th></tr></thead><tbody>${an.agents.map(e => `<tr><td>${whoLabel(e)}</td><td class="num">${esc(money(e.last_position, r.unit))}</td></tr>`).join('')}</tbody></table>`;
+  return `<p class="lead">${esc(r.issue_label)} · ${esc(r.context)}</p>
+  <table class="terms"><tbody>
+   <tr><th>Agreed ${esc(r.issue_label.toLowerCase())}</th><td class="num"><b style="font-size:20px">${esc(an.final_display)}</b></td></tr>
+   <tr><th>How it closed</th><td>${esc(an.resolution_label || '—')}${an.final_agent_role ? ' · accepted by ' + esc(an.final_agent_role) : ''}</td></tr>
+   <tr><th>Rounds elapsed</th><td class="num">${an.rounds_used} of ${an.max_rounds}</td></tr>
+  </tbody></table>
+  <table class="terms" style="margin-top:12px"><thead><tr><th>Participant</th><th>Opening offer</th><th>Final position</th></tr></thead><tbody>${an.agents.map(e => `<tr><td>${whoLabel(e)}</td><td class="num">${esc(money(e.opening_position, r.unit))}</td><td class="num">${esc(money(an.final_value, r.unit))}</td></tr>`).join('')}</tbody></table>`;
+}
+
+function timelineBlock(r) {
+  const an = r.analysis, kindLabel = { concession: 'conceded', hold: 'held position', retreat: 'moved backwards' };
+  return `<div class="tl">${an.timeline.map(b => `<div class="rd"><h4>Round ${b.round}</h4>${b.entries.map(x => `<div class="ev"><b>${esc(x.role)}${an.agents.find(a => a.id === x.agent_id && a.controlled_by === 'human') ? ' (You)' : ''}</b><span>${esc(ACTION[x.action] || x.action)}</span>${x.value != null ? `<span class="v">${esc(money(x.value, r.unit))}</span>` : ''}${x.move_kind ? `<span class="move ${x.move_kind}">${kindLabel[x.move_kind]}${x.move_kind !== 'hold' ? ' ' + esc(money(Math.abs(x.moved_by), r.unit)) + ' (' + x.move_pct + '%)' : ''}</span>` : ''}${x.stance ? `<span class="stance-badge">${esc(x.stance)}</span>` : ''}</div>`).join('')}</div>`).join('')}</div>`;
+}
+
+function deadlockBlock(r) {
+  const d = r.analysis.deadlock;
+  if (!d || !d.triggered) return `<p class="lead">No deadlock was detected.</p><p style="margin:0;color:#4f626c">Stalled rounds at the end: ${r.analysis.stall_rounds}. The Orchestrator watches for repeated offers and negligible movement and intervenes after 2 stalled rounds.</p>`;
+  return `<p class="lead">${esc(d.trigger.replace('_', ' '))} → ${esc(d.resolution)}</p><p style="margin:0 0 8px">${esc(d.explanation)}</p><p style="margin:0;color:#6d7c85;font-size:13px">Detected in round ${d.round} after ${d.stalled_rounds} stalled round(s).${d.mediated_value != null ? ' Mediated value: ' + esc(money(d.mediated_value, r.unit)) + '.' : ''}</p>`;
+}
+
+function performanceBlock(r) {
+  return `<div style="overflow-x:auto"><table class="terms"><thead><tr><th>Participant</th><th>Offers</th><th>Concessions</th><th>Holds</th><th>Retreats</th><th>Total conceded</th><th>Avg. step</th><th>Behaviour</th></tr></thead><tbody>${r.analysis.agents.map(e => `<tr><td><b>${whoLabel(e)}</b><br><small style="color:#6d7c85">${esc(e.personality_label)}</small></td><td class="num">${e.offers_made}</td><td class="num">${e.concession_count}</td><td class="num">${e.hold_count}</td><td class="num">${e.retreat_count}</td><td class="num">${e.total_conceded_pct}%</td><td class="num">${e.avg_step_pct}%</td><td>${esc(e.observed_behavior)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function render(r) {
+  const an = r.analysis, ev = an.events, modeLabel = r.workflow_mode === 'practice' ? 'Practice Mode' : 'Simulation Mode';
+  $sub = document.getElementById('sub');
+  $sub.textContent = `${r.scenario} · ${modeLabel} · Session ${r.id}`;
+  document.title = `Negotiation Outcome — ${r.scenario}`;
+  const sideBySide = an.agents.map(e => `${e.role}: ${e.personality_label}`).join(' · ');
+  const flatHistory = an.timeline.flatMap(b => b.entries.map(x => ({ agent_id: x.agent_id, action: x.action, value: x.value, round: b.round })));
+  const mom = computeMomentum(an.agents, flatHistory, an.status);
+  const avatarRow = an.agents.map(e => avatarHTML(e.role, e.personality, { human: e.controlled_by === 'human' })).join('');
+  document.getElementById('content').innerHTML = `
+  <section class="outcome-hero ${an.status}"><span class="status-chip ${an.status}">${esc(an.status_label)}</span>
+    <h2>${an.status === 'agreed' ? `Agreement reached at ${esc(an.final_display)}` : esc(HEAD[an.status] || an.status_label)}</h2>
+    <p>${esc(an.outcome_reason || 'The negotiation has not finished yet.')}</p>
+    <div style="display:flex;align-items:center;gap:12px;margin:10px 0">${avatarRow}<span style="font-size:13px;color:#6d7c85">${esc(sideBySide)}</span></div>
+    <div class="kpis">
+      <div class="kpi"><label>Rounds elapsed</label><b>${an.rounds_used} / ${an.max_rounds}</b></div>
+      <div class="kpi"><label>Total turns</label><b>${ev.total_turns}</b></div>
+      <div class="kpi"><label>Offers · counters</label><b>${ev.openings} · ${ev.counteroffers}</b></div>
+      <div class="kpi"><label>Accepts · rejects</label><b>${ev.accepts} · ${ev.rejects}</b></div>
+      <div class="kpi"><label>Concessions</label><b>${an.agents.reduce((n, e) => n + e.concession_count, 0)}</b></div>
+      <div class="kpi"><label>Reasoning engine</label><b style="font-size:15px">${esc(an.llm.engine_label)}</b></div>
+    </div>
+    ${mom ? `<div class="momentum-wrap" style="margin-top:6px">${gaugeSVG(mom.pct)}<div class="momentum-copy"><b>${esc(mom.label)}</b><span>${esc(mom.detail)}</span></div></div>` : ''}
+    ${r.skill_score != null ? `<div class="momentum-wrap" style="margin-top:6px">${gaugeSVG(Math.round(r.skill_score))}<div class="momentum-copy"><b>Your Negotiation Skill Score</b><span>Based on this session's agreement, your satisfaction and how efficiently it closed. <a href="my-negotiations.html">See your badges →</a></span></div></div>` : ''}
+    ${r.outcome ? `<div class="momentum-wrap" style="margin-top:6px">${r.skill_score == null ? gaugeSVG(Math.round(r.outcome.score)) : ''}<div class="momentum-copy"><b>${r.skill_score == null ? 'Simulation Outcome Score' : 'Session result'} — ${esc(r.outcome.label)}</b><span>${r.skill_score == null ? 'Scored with the same rules as Practice Mode, from both agents\' combined satisfaction, whether they agreed and how quickly. ' : ''}${r.outcome.badges.length ? 'Badges earned: ' + r.outcome.badges.map(b => esc(b.label)).join(' · ') : 'No badges earned in this session.'}</span></div></div>` : ''}
+    ${an.llm.notice ? `<div class="banner warn" style="margin-top:16px">${esc(an.llm.notice)}</div>` : ''}
+    ${an.terminal ? '' : '<div class="banner warn" style="margin-top:16px">This negotiation is still in progress — results are provisional. <a href="negotiation.html">Return to the Negotiation Area</a></div>'}
+  </section>
+
+  <div class="out-grid">
+    <section class="card"><h3>Agreement terms</h3>${termsBlock(r)}</section>
+    <section class="card"><h3>Objective satisfaction</h3><p class="lead">0 = at the hard limit or no deal · 100 = the agent's best opening value.</p>${satisfactionBlock(r)}</section>
+    <section class="card wide"><h3>Concession timeline</h3><p class="lead">How each side's position moved, round by round. Scrub through the negotiation to replay it.</p>
+      <div id="chartHost">${offerChart(an.agents.map(e => ({ id: e.id, role: e.role })), flatHistory, r.unit, an.status === 'agreed' ? an.final_value : null)}</div>
+      ${an.timeline.length > 1 ? `<div class="scrubber"><div class="scrubber-head"><span>Round 1</span><span id="scrubLabel">Showing round ${an.rounds_used}</span><span>Round ${an.rounds_used}</span></div><input type="range" id="scrub" min="1" max="${an.rounds_used}" value="${an.rounds_used}" aria-label="Replay by round"></div>` : ''}
+      <div id="tlHost" style="margin-top:20px">${timelineBlock(r)}</div></section>
+    <section class="card wide"><h3>Agent performance</h3><p class="lead">Derived from the recorded concessions of each participant.</p>${performanceBlock(r)}</section>
+    <section class="card"><h3>Deadlock handling</h3>${deadlockBlock(r)}</section>
+    <section class="card"><h3>Reasoning engine</h3><p class="lead">${esc(an.llm.engine_label)}</p><p style="margin:0;color:#4f626c">${an.llm.provider ? `Provider ${esc(PROVIDER_LABEL[an.llm.provider] || an.llm.provider)} · model ${esc(an.llm.model)}<br>` : ''}${an.llm.llm_calls} LLM call(s) · ${an.llm.fallback_turns} fallback turn(s) · ${an.llm.ai_turns} AI turn(s) · ${ev.corrections} Orchestrator correction(s)${an.llm.last_error ? `<br><span style="color:#94504d">Last LLM error: ${esc(an.llm.last_error)}</span>` : ''}</p></section>
+    <section class="card wide"><h3>Negotiation analytics</h3><p class="lead">Findings computed from this negotiation's recorded data.</p><ul class="insights">${an.insights.map(t => `<li>${esc(t)}</li>`).join('')}</ul></section>
+    <section class="card wide"><h3>Negotiation Report &amp; transcript</h3><p class="lead">Download the complete record of this negotiation.</p>
+      <div class="dl-row"><button class="btn" id="dlTx">Download transcript (.txt)</button><button class="btn" id="dlRep">Download Negotiation Report (.html)</button><button class="btn secondary" id="dlJson">Report data (.json)</button>${an.terminal ? '<button class="btn secondary" id="dlCert">Download Negotiation Certificate</button>' : ''}</div>
+      <p style="margin:12px 0 0;font-size:12.5px;color:#6d7c85">The report opens in any browser and can be saved as a PDF with Print → Save as PDF.</p></section>
+  </div>
+  <div class="actions" style="margin-top:22px"><a class="btn secondary" href="negotiation.html">← Back to Negotiation Area</a><a class="btn secondary" href="dashboard.html">Negotiation Analytics</a><a class="btn" href="index.html" id="again">Start a new negotiation →</a></div>`;
+
+  const bind = (idn, path, name) => document.getElementById(idn).onclick = async e => {
+    const b = e.currentTarget, t = b.textContent; b.disabled = true; b.textContent = 'Preparing…';
+    try { await download(path, name); toast('Download started'); } catch (x) { toast(x.message); } finally { b.disabled = false; b.textContent = t; }
+  };
+  bind('dlTx', `/negotiations/${r.id}/transcript`, `negotiation-transcript-${r.id}.txt`);
+  bind('dlRep', `/negotiations/${r.id}/report/download?format=html`, `negotiation-report-${r.id}.html`);
+  bind('dlJson', `/negotiations/${r.id}/report/download?format=json`, `negotiation-report-${r.id}.json`);
+  if (an.terminal) bind('dlCert', `/negotiations/${r.id}/certificate`, `negotiation-certificate-${r.id}.html`);
+  document.getElementById('again').onclick = () => Session.set({ negotiationId: null });
+
+  const scrub = document.getElementById('scrub');
+  if (scrub) {
+    scrub.oninput = () => {
+      const upto = Number(scrub.value);
+      document.getElementById('scrubLabel').textContent = upto >= an.rounds_used ? `Showing round ${an.rounds_used}` : `Replaying round ${upto} of ${an.rounds_used}`;
+      const sliced = flatHistory.filter(x => x.round <= upto);
+      document.getElementById('chartHost').innerHTML = offerChart(an.agents.map(e => ({ id: e.id, role: e.role })), sliced, r.unit, upto >= an.rounds_used && an.status === 'agreed' ? an.final_value : null);
+      document.querySelectorAll('#tlHost .tl .rd').forEach((el, idx) => el.classList.toggle('dimmed', idx + 1 > upto));
+    };
+  }
+}
+
+(async () => {
+  if (!(await authGuard())) return;
+  if (!qid) { document.getElementById('sub').textContent = ''; document.getElementById('content').innerHTML = '<div class="empty">No negotiation selected.<br><br><a class="btn" href="index.html">Start a new negotiation</a></div>'; return; }
+  try { render(await Api.report(qid)); }
+  catch (e) {
+    document.getElementById('sub').textContent = '';
+    document.getElementById('content').innerHTML = `<div class="banner error">${esc(e.status === 404 ? 'This negotiation is no longer available (the server may have restarted).' : e.message)}</div><p><a class="btn" href="index.html">Start a new negotiation</a></p>`;
+  }
+})();
+engineBadge();
+</script></body></html>

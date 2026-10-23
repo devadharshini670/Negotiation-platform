@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Negotiations — AI Multi-Agent Negotiation Platform</title>
+<link rel="stylesheet" href="style.css"><script src="api.js"></script></head>
+<body><script>document.write(nav('mine'))</script>
+<main id="main"><div class="wrap">
+<div class="eyebrow">Your account</div>
+<h1 class="page-title">My Negotiations.</h1>
+<p class="page-sub" id="sub">Your Practice Mode skill score, earned badges, and your own negotiation history.</p>
+
+<div class="out-grid" style="margin-top:6px">
+  <section class="card">
+    <h3>Negotiation Skill Score</h3><p class="lead">Based only on your own Practice Mode sessions: 50% reaching agreement, 35% your objective satisfaction, 15% closing in fewer rounds.</p>
+    <div class="score-ring-wrap" id="scoreWrap"></div>
+  </section>
+  <section class="card">
+    <h3>Progress</h3>
+    <div class="kpis" id="progressKpis"></div>
+  </section>
+  <section class="card wide">
+    <h3>Badges</h3><p class="lead">Unlocked from your actual recorded outcomes — nothing here is random.</p>
+    <div class="badge-grid" id="badges"></div>
+    <p class="auth-hint" id="simSummary" style="margin-top:14px"></p>
+  </section>
+  <section class="card wide">
+    <h3>Your sessions</h3><p class="lead">Every negotiation you've started in this server session.</p>
+    <div class="history" style="overflow-x:auto"><table><thead><tr><th>Scenario</th><th>Participants</th><th>Mode</th><th>Status</th><th>Result</th><th>Rounds</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+  </section>
+</div>
+</div></main>
+<script>
+(async () => {
+  const user = await authGuard(); if (!user) return;
+  try {
+    const [profile, hist] = await Promise.all([Api.myProfile(), Api.history()]);
+    const g = profile.gamification;
+    document.getElementById('scoreWrap').innerHTML = (g.average_score == null ? '<p class="auth-hint">Complete a Practice Mode negotiation to get your first score.</p>' :
+      `${gaugeSVG(Math.round(g.average_score), 110)}<div class="momentum-copy"><b>${g.average_score}/100 average</b><span>Best session: ${g.best_score}/100 across ${g.completed} completed negotiation${g.completed === 1 ? '' : 's'}.</span></div>`);
+    document.getElementById('progressKpis').innerHTML = [
+      ['Practice sessions completed', g.completed], ['Agreements reached', g.agreements], ['Badges earned', `${g.badges.length} / ${g.badges.length + g.locked_badges.length}`]
+    ].map(x => `<div class="kpi"><label>${x[0]}</label><b>${x[1]}</b></div>`).join('');
+    const badge = (b, locked) => `<div class="badge ${locked ? 'locked' : ''}"><div class="bicon">${locked ? '🔒' : '★'}</div><b>${esc(b.label)}</b><small>${esc(b.desc)}</small></div>`;
+    document.getElementById('badges').innerHTML = g.badges.map(b => badge(b, false)).join('') + g.locked_badges.map(b => badge(b, true)).join('');
+    const sim = g.simulation;
+    document.getElementById('simSummary').textContent = sim && sim.completed
+      ? `Simulation Mode results (judged by the same rules, not counted in your practice score): ${sim.completed} completed — ${sim.outcomes.map(o => o.count + '× ' + o.label).join(', ')}. Badges those results earned: ${sim.badges.length ? sim.badges.map(b => b.label).join(', ') : 'none'}.` : '';
+    document.getElementById('rows').innerHTML = hist.length ? hist.map(x => `<tr><td><strong>${esc(x.scenario_name)}</strong></td><td>${x.agents.map((a, i) => esc(a.role_label) + ' <small>(' + (x.workflow_mode === 'practice' && i === 0 ? 'You' : esc(P[a.personality].label)) + ')</small>').join(' · ')}</td><td>${x.workflow_mode === 'practice' ? 'Practice' : 'Simulation'}</td><td><span class="status-chip ${x.status}">${esc(STATUS[x.status])}</span></td><td>${x.final_value != null ? esc(money(x.final_value, x.unit)) : '—'}</td><td>${x.rounds_used}/${x.max_rounds}</td><td><a href="outcome.html?id=${encodeURIComponent(x.id)}">Outcome →</a></td></tr>`).join('') : '<tr><td colspan="7" class="empty">No sessions yet. <a href="index.html">Start one</a>.</td></tr>';
+  } catch (e) { document.getElementById('sub').textContent = ''; document.getElementById('rows').innerHTML = `<tr><td colspan="7" class="empty">${esc(e.message)}</td></tr>`; }
+})();
+engineBadge();
+</script></body></html>

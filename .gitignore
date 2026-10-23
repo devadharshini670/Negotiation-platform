@@ -1,6 +1,17 @@
+# secrets
+.env
 backend/.env
+*.env
+!*.env.example
+
+# environments / caches
 backend/.venv/
+.venv/
+venv/
 __pycache__/
-.pytest_cache/
 *.pyc
+.pytest_cache/
 .DS_Store
+node_modules/
+data/*.db
+backend/data/*.db

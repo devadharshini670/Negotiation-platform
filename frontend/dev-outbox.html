@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dev Outbox — AI Multi-Agent Negotiation Platform</title>
+<link rel="stylesheet" href="style.css"><script src="api.js"></script></head>
+<body class="auth-shell"><script>document.write(authHeader())</script>
+<main id="main"><div class="auth-wrap" style="align-items:flex-start;padding-top:60px"><div class="auth-card" style="max-width:640px">
+  <h1>Dev Outbox</h1><p class="sub">No SMTP server is configured, so verification and reset emails are recorded here instead of being sent. This page exists only in development mode and is disabled once a real mail server is configured or APP_ENV is not development.</p>
+  <div id="msg"></div><div id="list"></div>
+  <p class="auth-switch"><a href="login.html">Back to sign in</a></p>
+</div></div></main>
+<script>
+(async () => {
+  try {
+    const r = await Api.auth.devOutbox();
+    const list = document.getElementById('list');
+    if (!r.emails.length) { list.innerHTML = '<p class="auth-hint">No emails yet.</p>'; return; }
+    list.innerHTML = r.emails.map(m => `<div class="mail-card"><div class="mail-meta">To ${esc(m.to_email)} · ${new Date(m.created_at).toLocaleString()}</div><b>${esc(m.subject)}</b><pre>${esc(m.body)}</pre></div>`).join('');
+  } catch (e) {
+    document.getElementById('msg').innerHTML = `<div class="auth-error">${esc(e.message === 'Request failed (404)' ? 'The Dev Outbox is only available in development mode without a mail server.' : e.message)}</div>`;
+  }
+})();
+</script></body></html>
