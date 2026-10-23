@@ -3,7 +3,8 @@
 ## Project Title
 **The Table — AI Negotiation Suite**
 
-**Project Period:** 19 August 2026 - 24 September 2026
+**Original Sprint Period:** 19 August 2026 - 24 September 2026  
+**Latest Repository Update:** 23 October 2026 (Week 7 update; not part of original six-sprint velocity)
 
 > Story-point figures below are reconstructed Agile planning/documentation estimates, not historical measurements stored in the repository. Test results are based on the supplied project ZIP.
 
@@ -95,7 +96,20 @@ Cumulative Story Points (Total: 123 SP)
 
 ---
 
-## 4. Key Engineering Takeaways
+## 4. Latest Repository Update — 23 October 2026
+
+| Evidence item | Recorded information |
+|:---|:---|
+| Commit | [`6c848ac`](https://github.com/devadharshini670/Negotiation-platform/commit/6c848ac) |
+| Commit message | `Add latest updated negotiation platform` |
+| Author shown by GitHub | `devadharshini670` |
+| Change size | 71 files changed; +10,102 / −323 |
+| Additional capability areas | Practice Mode actions, deadlock handling, outcome analysis, transcript/report downloads, account/security, gamification/leaderboard, responsive UI and replay/presentation extras |
+| Test evidence | Repository checklist reports 65 automated tests and headless-browser runs; not independently rerun for this update |
+
+This later update is tracked separately from the six original sprints. The original story-point and velocity figures remain unchanged and must not be interpreted as measured estimates for commit `6c848ac`.
+
+## 5. Key Engineering Takeaways
 
 | Area | Engineering Learning |
 |:---|:---|

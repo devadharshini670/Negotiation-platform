@@ -1,4 +1,4 @@
-# Agile Sprint Plans (Week 01 to Week 06)
+# Agile Sprint Plans (Week 01 to Week 06) + Latest Week 7 Update
 
 ## Project Title
 **The Table — AI Negotiation Suite**
@@ -15,7 +15,8 @@
 | **Sprint 4** | Week 4 (Sep 09-15) | LLM Integration, Validation, Offers & Concessions | 25 | 25 | 100% |
 | **Sprint 5** | Week 5 (Sep 16-22) | Practice Mode, UI Integration, Reporting & Dashboard | 22 | 22 | 100% |
 | **Sprint 6** | Week 6 (Sep 23-24) | Testing, UI Polish, Traceability & Final Hardening | 10 | 10 | 100% |
-| **Total** | **6 Weeks (27 Working Days)** | **End-to-End AI Negotiation Platform Delivery** | **123** | **123** | **100%*** |
+| **Total (original plan)** | **6 Weeks (27 Working Days)** | **Original End-to-End Platform Delivery** | **123** | **123** | **100%*** |
+| **Week 7 update** | **23 Oct 2026 (repository increment)** | **Milestone 1–4 capabilities, reporting, security, gamification and responsive UI** | Not estimated | Not measured | Evidence recorded separately |
 
 *Story-point and velocity values are reconstructed documentation estimates rather than historical measurements stored in the repository.
 
@@ -193,3 +194,71 @@
 
 - **Verification Result:** 3 automated tests passed in the supplied project ZIP.
 - **Delivered:** Current Milestone 1 and Milestone 2 capability set documented and traceable.
+
+
+---
+
+## Week 7 Update — Latest Repository Increment
+
+**Update date:** 23 October 2026  
+**Repository commit:** [`6c848ac`](https://github.com/devadharshini670/Negotiation-platform/commit/6c848ac)  
+**Commit message:** `Add latest updated negotiation platform`  
+**Author shown by GitHub:** `devadharshini670`  
+**Recorded change size:** 71 files changed (+10,102 / −323).
+
+### Update Goal
+
+Bring the Agile records in line with the latest repository increment while keeping the original six sprint plans, dates, story-point estimates and reviews unchanged.
+
+### Newly documented capability areas
+
+1. Practice Mode negotiation actions, including human offers, counteroffers, acceptance, rejection and messages.
+2. Deadlock detection and handling, including settlement/breakdown paths and input validation.
+3. Outcome analysis with agreement terms, concession timeline, round counts and satisfaction indicators.
+4. Transcript and report outputs, including HTML summary reports and JSON report data as described by the repository checklist.
+5. Account and security workflows, including registration/login, email verification, password reset, rate limiting, CSRF protection and per-user authorization.
+6. Practice-mode gamification, badges and leaderboard.
+7. Responsive UI checks and additional interaction/presentation features such as replay controls and negotiation certificate.
+
+### Full Week 7 Capability Inventory — Verified Against the Uploaded Repository Snapshot
+
+The uploaded repository snapshot's `README.md` and `MILESTONE_CHECKLIST.md` describe the following current platform scope. These are repository-documented capabilities; test claims are not represented as independently rerun here.
+
+**Negotiation and agent engine**
+- Nine predefined scenarios: Vendor Pricing, Job Offer, Project Budget Allocation, Freelance Contract, Real Estate Price, Software Development Contract, Salary & Benefits, Supplier Contract Renewal, and Project Deadline.
+- Nine personalities: Aggressive, Collaborative, Risk-Averse, Competitive, Empathetic, Strategic, Opportunistic, Compromising, and Analytical.
+- Agent configuration includes roles, goals, constraints, objectives, opening/target/hard-limit values, negotiation mode, engine/provider/model, and maximum rounds.
+- Simulation Mode (AI vs AI) and Practice Mode (human vs AI); offers, counteroffers, accept/reject actions and free-text messages.
+- Orchestrator-controlled turns, rounds, history, state transitions, hard-constraint enforcement, terminal conditions and per-negotiation locking.
+- Structured LLM reasoning through Groq or Google Gemini, with a deterministic personality-driven rule engine and fallback.
+- Offer validation, concession/hold/retreat tracking, deadlock detection, mediated midpoint settlement or explained breakdown.
+
+**Analysis, reporting and replay**
+- Live negotiation transcript, per-turn explanation, stance indicators, orchestrator activity log, round/gap/concession/deadlock metrics and offer-movement chart.
+- Outcome screen with final status, agreement terms, rounds, objective satisfaction, concession timeline/chart, agent performance, deadlock information and insights.
+- Platform-wide analytics derived from recorded sessions rather than hard-coded totals.
+- Downloadable `.txt` transcript, self-contained `.html` Negotiation Report suitable for printing to PDF, `.json` report data, and a print-ready Negotiation Certificate for completed sessions.
+- Replay scrubber that replays negotiation rounds and updates the chart/timeline; Deal Momentum gauge; agent avatars; command palette, dark-mode toggle and reduced-motion-aware agreement celebration.
+
+**Accounts, privacy and security**
+- Email/password registration and sign-in with email verification; Google and GitHub OAuth 2.0.
+- Password hashing, one-time password-reset links, login lockout/rate limiting, HTTP-only same-site sessions with inactivity expiry, CSRF protection and per-user negotiation authorization.
+- Account settings for profile/password changes, provider disconnection rules, optional TOTP two-factor authentication with recovery codes, personal data export and account deletion.
+- Practice-only personal skill score/badges and leaderboard based on average skill score; leaderboard does not expose negotiation IDs or cross-user negotiation content.
+- Security & Privacy page and development-only email outbox when SMTP is not configured.
+- Explain-only AI Negotiation Assistant on signed-in pages: answers questions about platform/current negotiation using a detached, read-only and redacted snapshot; cannot place offers or mutate negotiations; maintains session-scoped assistant history and uses a built-in guide fallback when an LLM is unavailable.
+
+**Architecture and stack recorded by the repository**
+- Static HTML/CSS/JavaScript frontend communicating over HTTP/JSON with a Flask API.
+- Python 3, Flask, python-dotenv, Groq/Gemini integrations via standard-library `urllib`, and pytest.
+- No database and no frontend framework are listed in the README.
+- The Orchestrator remains the authority for applying decisions; model output is advisory and validated before state mutation.
+
+**Verification claims in the repository**
+- `MILESTONE_CHECKLIST.md` marks Milestones 1–4 and cross-cutting requirements as PASS and reports 65 automated tests plus headless-browser runs.
+- The same checklist names security, consistency, responsive checks at 1440/1180/820/390 px, downloads, account isolation, and assistant read-only behavior.
+- This is documentation evidence from the uploaded snapshot; this update did not execute the test suite or reproduce the browser runs.
+
+### Review and evidence
+
+The commit's `MILESTONE_CHECKLIST.md` reports 65 automated tests and headless-browser runs. These are recorded as repository-reported evidence, not as tests independently rerun during this documentation update. No new story points or historical sprint-day assignments are invented for this later increment.

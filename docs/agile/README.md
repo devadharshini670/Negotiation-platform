@@ -1,4 +1,4 @@
-# 6-Week Agile Project Framework & Lifecycle
+# Agile Project Framework & Lifecycle (Original Six Sprints + Latest Update)
 
 ## Project Title
 **The Table — AI Negotiation Suite**
@@ -7,7 +7,7 @@
 
 ## 1. Executive Summary & Project Context
 
-This repository represents the work completed over a **6-week Agile development period** from **19 August 2026 to 24 September 2026**, covering **27 working days**. The engineering process is documented using the **Agile Scrum Framework** with short sprint cycles.
+The original sprint records cover **19 August 2026 to 24 September 2026** across six sprints and 27 working days. A separately dated **Week 7 repository update on 23 October 2026** records the latest team increment without changing the original sprint history. The engineering process is documented using the **Agile Scrum Framework** with short sprint cycles.
 
 The objective of the project was to develop an AI-based multi-agent negotiation platform capable of scenario selection, independent agent configuration, personality-driven negotiation, deterministic multi-round orchestration, optional LLM reasoning, constraint validation, Practice Mode, outcome reporting and dashboard analytics.
 
@@ -29,6 +29,53 @@ The objective of the project was to develop an AI-based multi-agent negotiation 
 | Week 6 (Sep 23-24) : Sprint 6 - Testing, UI Polish, Traceability & Final Hardening           |
 +------------------------------------------------------------------------------------------------+
 ```
+
+### Latest Repository Update — Week 7 (23 October 2026)
+
+| Update | Date | Source | Scope recorded |
+|:---|:---|:---|:---|
+| Latest platform increment | 23 October 2026 | [Commit `6c848ac`](https://github.com/devadharshini670/Negotiation-platform/commit/6c848ac), `Add latest updated negotiation platform` | Milestone traceability through Milestones 1–4; Practice Mode; deadlock handling; outcome analysis; downloadable transcripts/reports; account/security workflows; gamification/leaderboard; responsive UI and browser-check evidence. |
+
+This is a later repository update, not a retroactive change to the six original sprint dates or their reconstructed story-point estimates. The commit checklist reports 65 automated tests and headless-browser runs; those are repository-reported results and were not independently rerun for this document update.
+
+### Full Week 7 Capability Inventory — Verified Against the Uploaded Repository Snapshot
+
+The uploaded repository snapshot's `README.md` and `MILESTONE_CHECKLIST.md` describe the following current platform scope. These are repository-documented capabilities; test claims are not represented as independently rerun here.
+
+**Negotiation and agent engine**
+- Nine predefined scenarios: Vendor Pricing, Job Offer, Project Budget Allocation, Freelance Contract, Real Estate Price, Software Development Contract, Salary & Benefits, Supplier Contract Renewal, and Project Deadline.
+- Nine personalities: Aggressive, Collaborative, Risk-Averse, Competitive, Empathetic, Strategic, Opportunistic, Compromising, and Analytical.
+- Agent configuration includes roles, goals, constraints, objectives, opening/target/hard-limit values, negotiation mode, engine/provider/model, and maximum rounds.
+- Simulation Mode (AI vs AI) and Practice Mode (human vs AI); offers, counteroffers, accept/reject actions and free-text messages.
+- Orchestrator-controlled turns, rounds, history, state transitions, hard-constraint enforcement, terminal conditions and per-negotiation locking.
+- Structured LLM reasoning through Groq or Google Gemini, with a deterministic personality-driven rule engine and fallback.
+- Offer validation, concession/hold/retreat tracking, deadlock detection, mediated midpoint settlement or explained breakdown.
+
+**Analysis, reporting and replay**
+- Live negotiation transcript, per-turn explanation, stance indicators, orchestrator activity log, round/gap/concession/deadlock metrics and offer-movement chart.
+- Outcome screen with final status, agreement terms, rounds, objective satisfaction, concession timeline/chart, agent performance, deadlock information and insights.
+- Platform-wide analytics derived from recorded sessions rather than hard-coded totals.
+- Downloadable `.txt` transcript, self-contained `.html` Negotiation Report suitable for printing to PDF, `.json` report data, and a print-ready Negotiation Certificate for completed sessions.
+- Replay scrubber that replays negotiation rounds and updates the chart/timeline; Deal Momentum gauge; agent avatars; command palette, dark-mode toggle and reduced-motion-aware agreement celebration.
+
+**Accounts, privacy and security**
+- Email/password registration and sign-in with email verification; Google and GitHub OAuth 2.0.
+- Password hashing, one-time password-reset links, login lockout/rate limiting, HTTP-only same-site sessions with inactivity expiry, CSRF protection and per-user negotiation authorization.
+- Account settings for profile/password changes, provider disconnection rules, optional TOTP two-factor authentication with recovery codes, personal data export and account deletion.
+- Practice-only personal skill score/badges and leaderboard based on average skill score; leaderboard does not expose negotiation IDs or cross-user negotiation content.
+- Security & Privacy page and development-only email outbox when SMTP is not configured.
+- Explain-only AI Negotiation Assistant on signed-in pages: answers questions about platform/current negotiation using a detached, read-only and redacted snapshot; cannot place offers or mutate negotiations; maintains session-scoped assistant history and uses a built-in guide fallback when an LLM is unavailable.
+
+**Architecture and stack recorded by the repository**
+- Static HTML/CSS/JavaScript frontend communicating over HTTP/JSON with a Flask API.
+- Python 3, Flask, python-dotenv, Groq/Gemini integrations via standard-library `urllib`, and pytest.
+- No database and no frontend framework are listed in the README.
+- The Orchestrator remains the authority for applying decisions; model output is advisory and validated before state mutation.
+
+**Verification claims in the repository**
+- `MILESTONE_CHECKLIST.md` marks Milestones 1–4 and cross-cutting requirements as PASS and reports 65 automated tests plus headless-browser runs.
+- The same checklist names security, consistency, responsive checks at 1440/1180/820/390 px, downloads, account isolation, and assistant read-only behavior.
+- This is documentation evidence from the uploaded snapshot; this update did not execute the test suite or reproduce the browser runs.
 
 ### Daily & Weekly Scrum Ceremonies
 

@@ -137,4 +137,35 @@ A user story or feature is considered **Done** only when all applicable criteria
 
 ---
 
+
+### Latest Repository Update — 23 October 2026 (Commit `6c848ac`)
+
+The following capability areas are additionally recorded by the latest repository commit and milestone checklist. This update supplements the existing story cards; it does not change the original backlog's 123 SP reconstructed planning estimate.
+
+| Update ID | Capability / User Need | Evidence area named in repository | Status in this update |
+|:---|:---|:---|:---|
+| US-UPD-01 | Practice Mode supports human offers, counteroffers, accept/reject and messages | `frontend/negotiation.html`; milestone tests | Listed in commit checklist |
+| US-UPD-02 | Detect and handle repeated-offer deadlocks | `backend/engine/deadlock.py` | Listed in commit checklist |
+| US-UPD-03 | Inspect final outcome, agreement terms and concession timeline | `frontend/outcome.html`; analytics/concession modules | Listed in commit checklist |
+| US-UPD-04 | Download transcript and negotiation report | `backend/engine/reporting.py`; report/transcript checks | HTML and JSON outputs described by checklist |
+| US-UPD-05 | Protect user accounts and negotiation data | `backend/auth/` and auth/account tests | Security workflows listed in commit checklist |
+| US-UPD-06 | Track Practice Mode progress with scores, badges and leaderboard | `backend/engine/gamification.py` | Listed in commit checklist |
+| US-UPD-07 | Support responsive layouts and additional replay/presentation interactions | milestone checklist and browser checks | Reported in commit checklist |
+
+### Additional Week 7 User-Need Records
+
+| Update ID | Capability | User need / acceptance evidence | Repository status |
+|:---|:---|:---|:---|
+| US-UPD-08 | Nine scenarios and nine personalities | Configure varied negotiation contexts and distinct agent behaviours | Listed as implemented in README/checklist |
+| US-UPD-09 | Groq/Gemini provider and deterministic fallback | Run structured agent reasoning with safe fallback when external credentials/provider are unavailable | Listed in README/checklist |
+| US-UPD-10 | Live Negotiation Area analytics | Show transcript, per-turn explanation, stance, round/gap/concession/deadlock metrics and offer chart | Listed in README/checklist |
+| US-UPD-11 | Outcome analysis and replay | Review agreement terms, satisfaction, concession timeline, agent performance, deadlock info and replay rounds | Listed in README/checklist |
+| US-UPD-12 | Certificate and Deal Momentum | Download a certificate for terminal sessions and view offer-gap progress | Listed in README/checklist |
+| US-UPD-13 | Explain-only AI Negotiation Assistant | Answer questions from a redacted read-only snapshot; must not modify negotiation state | Listed in README/checklist |
+| US-UPD-14 | Account lifecycle and privacy | Registration, verification, OAuth, reset, TOTP, secure sessions, CSRF, per-user authorization, data export and deletion | Listed in README/checklist |
+| US-UPD-15 | Skill score, badges and leaderboard | Calculate scores from recorded outcomes; expose only username and average score across users | Listed in README/checklist |
+| US-UPD-16 | Theme, navigation and accessibility polish | Dark mode, command palette, reduced-motion-aware celebration, responsive layout and browser checks | Listed in README/checklist |
+
+**Verification note:** The checklist reports 65 automated tests and headless-browser runs. The update records this as repository-provided evidence; it does not represent an independent test run. No new story points are assigned without a documented estimation session.
+
 **Backlog total:** **123 SP** (reconstructed planning estimate).
