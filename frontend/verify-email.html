@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verify your email — AI Multi-Agent Negotiation Platform</title>
+<link rel="stylesheet" href="style.css"><script src="api.js"></script></head>
+<body class="auth-shell"><script>document.write(authHeader())</script>
+<main id="main"><div class="auth-wrap"><div class="auth-card" id="card" style="max-width:460px">
+  <h1>Verify your email</h1><p class="sub" id="sub">We sent a verification link to your email address.</p>
+  <div id="msg"></div>
+  <form id="form" novalidate>
+    <div class="auth-field"><label for="token">Verification code</label><input id="token" name="token" required placeholder="Paste the code or link token here" autocomplete="off"></div>
+    <button class="btn auth-submit" id="submit" type="submit">Verify email</button>
+  </form>
+  <p class="auth-switch">Didn't get it? <a href="#" id="resend">Resend verification email</a></p>
+</div></div></main>
+<script>
+const params = new URLSearchParams(location.search);
+const token = params.get('token');
+const email = sessionStorage.getItem('pending_verify_email') || '';
+document.getElementById('sub').textContent = email ? `We sent a verification link to ${email}.` : 'We sent a verification link to your email address.';
+
+async function doVerify(t) {
+  const msg = document.getElementById('msg'); msg.innerHTML = '';
+  try {
+    const r = await Api.auth.verifyEmail(t);
+    msg.innerHTML = `<div class="auth-success">Email verified for <b>${esc(r.username)}</b>. Redirecting to sign in…</div>`;
+    document.getElementById('form').style.display = 'none';
+    setTimeout(() => location.href = 'login.html', 1100);
+  } catch (err) { msg.innerHTML = `<div class="auth-error">${esc(err.message)}</div>`; }
+}
+
+if (token) { doVerify(token); }
+document.getElementById('form').onsubmit = e => { e.preventDefault(); doVerify(document.getElementById('token').value.trim()); };
+document.getElementById('resend').onclick = async e => {
+  e.preventDefault();
+  if (!email) { document.getElementById('msg').innerHTML = '<div class="auth-error">Register again — this page only knows the email from your most recent signup.</div>'; return; }
+  await Api.auth.resendVerification(email);
+  document.getElementById('msg').innerHTML = '<div class="auth-success">If that email is registered and unverified, a new link has been sent.</div>';
+};
+</script></body></html>

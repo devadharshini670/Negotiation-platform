@@ -1,3 +1,103 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Strategy Studio — The Table</title><link rel="stylesheet" href="style.css"><script src="api.js"></script></head><body><script>document.write(nav('home'))</script><main><div class="wrap"><div class="eyebrow">Step 02 · Strategy studio</div><h1 class="page-title" id="title">Configure the participants</h1><p class="page-sub" id="sub">Give each side an independent personality. The selected strategy will influence how the agent anchors, evaluates and concedes.</p><div class="form-grid" id="agents"></div><div class="card" style="padding:20px;margin-top:18px"><div class="section-head" style="margin:0 0 8px"><div><h2 style="font-size:21px">Negotiation mode</h2><p>Simulation lets both agents negotiate autonomously. Practice puts you in Agent A and keeps Agent B AI-controlled.</p></div></div><div style="display:flex;gap:9px"><button class="btn" id="simulation">Simulation</button><button class="btn secondary" id="practice">Practice</button></div></div><div class="card" style="padding:20px;margin-top:18px"><div class="section-head" style="margin:0 0 8px"><div><h2 style="font-size:21px">Reasoning engine</h2><p>Use the real LLM when configured, or the deterministic fallback for reliable demos.</p></div></div><div style="display:flex;gap:9px;flex-wrap:wrap"><button class="btn" id="llm">Live LLM</button><button class="btn secondary" id="mock">Mock / Rule-Based</button><span id="engine-note" class="notice" style="padding:9px 12px">Checking provider…</span></div></div><div class="actions"><a class="btn secondary" href="index.html">← Scenario</a><button class="btn" id="next">Continue to readiness →</button></div><div id="error" class="notice" style="display:none;margin-top:12px"></div></div></main><script>
-(async()=>{const s=Session.get();if(!s.scenarioId){location.href='index.html';return}const xs=await Api.scenarios();const sc=xs.find(x=>x.id===s.scenarioId);document.getElementById('title').textContent=sc.name;document.getElementById('sub').textContent=sc.description;let chosen={a:s.personalityA||'collaborative',b:s.personalityB||'aggressive'},mode=s.mode||'mock',workflow=s.workflowMode||'simulation';document.getElementById('agents').innerHTML=sc.agents.map((a,i)=>`<section class="card agent-card"><div class="agent-top"><div><div class="role">Agent ${i===0?'A':'B'}</div><div class="agent-name">${esc(a.role)}</div></div><span class="chip">${a.direction==='maximize'?'Value ↑':'Value ↓'}</span></div><div class="field"><label>Goal</label><p>${esc(a.goal)}</p></div><div class="field"><label>Constraint</label><p>${esc(a.constraint)}</p></div><div class="field"><label>Negotiation objective</label><p>${esc(a.objective)}</p></div><div class="field"><label>Define strategy</label><div class="personality-grid">${Object.entries(P).map(([k,v])=>`<div class="personality ${chosen[i?'b':'a']===k?'selected':''}" data-side="${i?'b':'a'}" data-p="${k}"><b>${v.label}</b><small>${v.desc}</small></div>`).join('')}</div></div></section>`).join('');document.querySelectorAll('.personality').forEach(e=>e.onclick=()=>{const side=e.dataset.side;chosen[side]=e.dataset.p;document.querySelectorAll(`.personality[data-side="${side}"]`).forEach(x=>x.classList.remove('selected'));e.classList.add('selected')});const setWorkflow=m=>{workflow=m;document.getElementById('simulation').classList.toggle('secondary',m!=='simulation');document.getElementById('practice').classList.toggle('secondary',m!=='practice')};setWorkflow(workflow);const setMode=m=>{mode=m;document.getElementById('llm').classList.toggle('secondary',m!=='llm');document.getElementById('mock').classList.toggle('secondary',m!=='mock')};setMode(mode);try{const h=await Api.llm();document.getElementById('engine-note').textContent=h.configured?'Anthropic provider detected — real LLM can be used.':'No LLM key detected — mock fallback is ready.';if(!h.configured)document.getElementById('llm').textContent='Live LLM (not configured)'}catch{}document.getElementById('simulation').onclick=()=>setWorkflow('simulation');document.getElementById('practice').onclick=()=>setWorkflow('practice');document.getElementById('llm').onclick=()=>setMode('llm');document.getElementById('mock').onclick=()=>setMode('mock');document.getElementById('next').onclick=()=>{Session.set({personalityA:chosen.a,personalityB:chosen.b,mode,workflowMode:workflow});location.href='ready.html'};})();
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Configuration — AI Multi-Agent Negotiation Platform</title>
+<link rel="stylesheet" href="style.css"><script src="api.js"></script></head>
+<body><script>document.write(nav('home'))</script>
+<main id="main"><div class="wrap">
+<div class="eyebrow">Step 02 · Agent Configuration</div>
+<h1 class="page-title" id="title">Agent Configuration</h1>
+<p class="page-sub" id="sub">Give each side a personality. It changes how the agent anchors, evaluates offers and concedes.</p>
+<div class="form-grid" id="agents"></div>
+
+<div class="card" style="padding:20px;margin-top:18px">
+  <div class="section-head" style="margin:0 0 12px"><div><h2 style="font-size:21px">Session mode</h2><p>Choose who negotiates.</p></div></div>
+  <div class="tile-grid" id="modeTiles">
+    <button class="tile" data-wf="simulation" aria-pressed="true"><b>Simulation Mode · AI vs AI</b><small>Both agents negotiate autonomously while you observe every offer, reasoning step and concession.</small></button>
+    <button class="tile" data-wf="practice" aria-pressed="false"><b>Practice Mode · You vs AI</b><small>You negotiate as Agent A. The AI agent reacts to your actual offers and messages.</small></button>
+  </div>
+</div>
+
+<div class="card" style="padding:20px;margin-top:18px">
+  <div class="section-head" style="margin:0 0 12px"><div><h2 style="font-size:21px">Reasoning engine</h2><p>Use a real LLM (Groq or Google Gemini) or the deterministic rule-based engine.</p></div></div>
+  <div class="tile-grid" id="engineTiles">
+    <button class="tile" data-mode="llm" aria-pressed="false"><b id="llmTitle">Real LLM</b><small>Agents reason with a large language model. Keys stay on the server.</small></button>
+    <button class="tile" data-mode="mock" aria-pressed="true"><b>Mock / Rule-Based</b><small>Deterministic, personality-driven engine. Reliable for demos; never labelled as an LLM.</small></button>
+  </div>
+  <div class="engine-opts" id="llmOpts" style="display:none">
+    <div><label for="provider">LLM provider</label><select id="provider"></select></div>
+    <div><label>Default model</label><div id="defaultModel" class="notice" style="margin:0;min-height:42px;display:flex;align-items:center">Default (automatic)</div></div>
+  </div>
+  <label class="check" id="fallbackRow" style="display:none"><input type="checkbox" id="pauseOnError"> Pause and show the error if the LLM fails on a turn (do not fall back to the rule-based engine)</label>
+  <div id="engine-note" class="notice" style="margin-top:14px">Checking provider…</div>
+</div>
+
+<div class="card" style="padding:20px;margin-top:18px">
+  <div class="section-head" style="margin:0 0 12px"><div><h2 style="font-size:21px">Maximum rounds</h2><p>If no agreement is reached by then, the negotiation ends. Deadlock detection can stop it earlier.</p></div></div>
+  <select id="rounds" aria-label="Maximum rounds" style="padding:10px 12px;border:1px solid #d0d9dc;border-radius:11px;background:#fffdfa"></select>
+</div>
+
+<div class="actions"><a class="btn secondary" href="index.html">← Scenario</a><button class="btn" id="next">Review &amp; launch →</button></div>
+<div id="error" class="banner error" style="display:none;margin-top:12px"></div>
+</div></main>
+<script>
+(async () => {
+  if (!(await authGuard())) return;
+  const s = Session.get();
+  if (!s.scenarioId) { location.href = 'index.html'; return; }
+  let xs, sc, llm = null;
+  try { xs = await Api.scenarios(); } catch (e) { const b = document.getElementById('error'); b.style.display = 'block'; b.textContent = e.message; return; }
+  sc = xs.find(x => x.id === s.scenarioId); if (!sc) { location.href = 'index.html'; return; }
+  document.getElementById('title').textContent = sc.name;
+  document.getElementById('sub').textContent = sc.description;
+  const st = { a: s.personalityA || 'collaborative', b: s.personalityB || 'aggressive', mode: s.mode || 'mock', wf: s.workflowMode || 'simulation', provider: s.llmProvider || '', rounds: s.maxRounds || sc.default_max_rounds };
+
+  function renderAgents() {
+    const practice = st.wf === 'practice';
+    document.getElementById('agents').innerHTML = sc.agents.map((a, i) => {
+      const human = practice && i === 0, hidden = practice && i === 1, side = i ? 'b' : 'a';
+      return `<section class="card agent-card"><div class="agent-top"><div class="agent-id">${avatarHTML(a.role, null, { human })}<div><div class="role">Agent ${i ? 'B' : 'A'}${human ? ' · You' : practice ? ' · AI opponent' : ''}</div><div class="agent-name">${esc(a.role)}</div></div></div><span class="chip">${a.direction === 'maximize' ? 'Value ↑' : 'Value ↓'}</span></div>
+      <div class="field"><label>Goal</label><p>${esc(a.goal)}</p></div>
+      <div class="field"><label>Constraint</label><p>${hidden ? 'Confidential in Practice Mode — revealed after the negotiation.' : esc(a.constraint)}</p></div>
+      <div class="field"><label>Negotiation objective</label><p>${esc(a.objective)}</p></div>
+      ${human ? `<div class="notice">You control this side and make every move yourself, so no personality is needed.</div>` :
+      `<div class="field"><label>Personality</label><div class="personality-grid">${Object.entries(P).map(([k, v]) => `<div class="personality ${st[side] === k ? 'selected' : ''}" role="button" tabindex="0" data-side="${side}" data-p="${k}"><b>${v.label}</b><small>${v.desc}</small></div>`).join('')}</div></div>`}</section>`;
+    }).join('');
+    document.querySelectorAll('.personality').forEach(e => {
+      const pick = () => { st[e.dataset.side] = e.dataset.p; document.querySelectorAll(`.personality[data-side="${e.dataset.side}"]`).forEach(x => x.classList.remove('selected')); e.classList.add('selected'); };
+      e.onclick = pick; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pick(); } };
+    });
+  }
+  function renderTiles() {
+    document.querySelectorAll('#modeTiles .tile').forEach(t => t.setAttribute('aria-pressed', t.dataset.wf === st.wf));
+    document.querySelectorAll('#engineTiles .tile').forEach(t => t.setAttribute('aria-pressed', t.dataset.mode === st.mode));
+    document.getElementById('llmOpts').style.display = st.mode === 'llm' && llm && llm.configured ? 'flex' : 'none';
+    document.getElementById('fallbackRow').style.display = st.mode === 'llm' && llm && llm.configured ? 'flex' : 'none';
+    const note = document.getElementById('engine-note');
+    if (!llm) return;
+    if (st.mode === 'llm' && !llm.configured) { note.className = 'banner warn'; note.textContent = 'Real LLM selected, but no Groq or Gemini API key is configured on the server. Add GROQ_API_KEY or GEMINI_API_KEY to backend/.env and restart, or choose the rule-based engine. Nothing will silently switch to rule-based mode.'; }
+    else if (st.mode === 'llm') { note.className = 'notice'; note.textContent = 'Real LLM mode with the provider selected below only - it is never swapped for the other one. The server automatically selects an available model for this provider. If a turn fails after retries, it is clearly marked as a rule-based fallback (or paused, if you enable the option below).'; }
+    else { note.className = 'notice'; note.textContent = llm.configured ? `Mock / Rule-Based mode. A real LLM (${llm.providers.filter(p => p.configured).map(p => p.label).join(' / ')}) can be selected if you switch.` : 'No LLM key detected — Mock / Rule-Based mode is ready.'; }
+  }
+  document.querySelectorAll('#modeTiles .tile').forEach(t => t.onclick = () => { st.wf = t.dataset.wf; renderAgents(); renderTiles(); });
+  document.querySelectorAll('#engineTiles .tile').forEach(t => t.onclick = () => { st.mode = t.dataset.mode; renderTiles(); });
+  document.getElementById('rounds').innerHTML = [...new Set([4, 6, 8, 10, 12, 14, st.rounds])].sort((a, b) => a - b).map(n => `<option value="${n}" ${n === st.rounds ? 'selected' : ''}>${n} rounds</option>`).join('');
+  renderAgents(); renderTiles();
+  try {
+    llm = await Api.llm();
+    const sel = document.getElementById('provider');
+    const firstOk = (llm.providers.find(p => p.configured) || {}).id || '';
+    const want = llm.providers.some(p => p.id === st.provider && p.configured) ? st.provider : firstOk;
+    sel.innerHTML = llm.providers.map(p => `<option value="${p.id}" ${p.configured ? '' : 'disabled'} ${want === p.id ? 'selected' : ''}>${esc(p.label)}${p.configured ? (p.verified ? ' — verified' : ' — key found') : ' — not configured'}</option>`).join('');
+    document.getElementById('defaultModel').textContent = 'Default (automatic)';
+    document.getElementById('pauseOnError').checked = !!s.pauseOnError;
+    if (!llm.configured) document.getElementById('llmTitle').textContent = 'Real LLM (no key configured)';
+  } catch (e) { document.getElementById('engine-note').textContent = 'Could not check LLM status: ' + e.message; }
+  renderTiles();
+  document.getElementById('next').onclick = () => {
+    Session.set({ personalityA: st.wf === 'practice' ? (st.a || 'collaborative') : st.a, personalityB: st.b, mode: st.mode, workflowMode: st.wf,
+      llmProvider: st.mode === 'llm' ? document.getElementById('provider').value : '', pauseOnError: document.getElementById('pauseOnError').checked, llmModel: '', maxRounds: Number(document.getElementById('rounds').value) });
+    location.href = 'ready.html';
+  };
+})();
+engineBadge();
 </script></body></html>

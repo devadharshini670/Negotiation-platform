@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Security &amp; Privacy — AI Multi-Agent Negotiation Platform</title>
+<link rel="stylesheet" href="style.css"><script src="api.js"></script></head>
+<body><script>document.write(nav(''))</script>
+<main id="main"><div class="wrap">
+<div class="eyebrow">Account &amp; platform</div>
+<h1 class="page-title">Security &amp; Privacy.</h1>
+<p class="page-sub">What's actually implemented behind your account — written plainly, not as marketing copy.</p>
+<div class="out-grid">
+  <section class="card"><h3>Password storage</h3><p class="lead">Passwords are never stored in plain text.</p><p>Each password is salted and hashed with Werkzeug's PBKDF2 implementation before it ever touches the database. The platform itself cannot recover your password — only reset it via a one-time emailed link.</p></section>
+  <section class="card"><h3>Login protection</h3><p class="lead">Repeated failed logins are rate-limited.</p><p>After 5 incorrect attempts, an account is locked for 15 minutes, blocking further guesses even with the correct password.</p></section>
+  <section class="card"><h3>Session handling</h3><p class="lead">Sessions expire automatically.</p><p>You're signed out after 2 hours of inactivity. Session cookies are HTTP-only and same-site, so they can't be read by page scripts or sent from another site.</p></section>
+  <section class="card"><h3>CSRF protection</h3><p class="lead">Every action that changes data is verified.</p><p>Each session carries a server-issued token that must accompany every create/update request. Requests missing it, or carrying the wrong one, are rejected.</p></section>
+  <section class="card"><h3>Per-user authorization</h3><p class="lead">Your negotiations are yours alone.</p><p>Every negotiation is tied to the account that created it. Another signed-in user cannot view, act on, or even confirm the existence of your sessions — attempting to do so returns the same "not found" response as a made-up ID.</p></section>
+  <section class="card"><h3>Email verification &amp; reset</h3><p class="lead">Ownership of your address is proven, not assumed.</p><p>New email-and-password accounts must verify their email before signing in, and password resets use single-use, time-limited links. Reset requests get the same answer whether or not an address is registered, so the form can't be used to find out who has an account.</p></section>
+  <section class="card wide"><h3>Google &amp; GitHub sign-in</h3><p class="lead">Standard OAuth 2.0, handled entirely by the server.</p><p>You're sent to Google or GitHub to approve access, and the provider hands the server a one-time code that is checked against a per-attempt <em>state</em> value tied to your browser (blocking forged callbacks). The client secret and the provider's tokens never reach your browser, and the tokens aren't stored. We only accept an email address the provider itself has verified. If it matches an existing account, the sign-in method is linked to that account instead of creating a duplicate. If someone had registered that address without ever verifying it, their password is removed so only the real owner can use the account. Accounts created this way have no password.</p></section>
+  <section class="card"><h3>Two-factor authentication</h3><p class="lead">Optional, and applies to every way of signing in.</p><p>Turn it on under Account settings with any authenticator app. Codes work once, wrong codes count toward the same lockout as wrong passwords, and single-use recovery codes cover a lost phone. The same step is required after Google or GitHub sign-in.</p></section>
+  <section class="card"><h3>Your data &amp; your account</h3><p class="lead">Export it or delete it yourself.</p><p>Download everything the platform holds about you as a JSON file, or permanently delete your account and all your negotiations. Deleting asks for your username, your password if you have one, and a two-factor code if it's on. You can also disconnect Google or GitHub, as long as another way to sign in remains.</p></section>
+</div>
+<p style="color:var(--muted);font-size:13px;margin-top:8px">Not implemented in this build: email-change flows and hardware security keys (WebAuthn).</p>
+</div></main>
+<script>engineBadge();</script></body></html>

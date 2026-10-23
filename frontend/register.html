@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Create account — AI Multi-Agent Negotiation Platform</title>
+<link rel="stylesheet" href="style.css"><script src="api.js"></script></head>
+<body class="auth-shell"><script>document.write(authHeader())</script>
+<main id="main"><div class="auth-wrap"><div class="auth-card">
+  <h1>Create your account</h1><p class="sub">Sign up to run negotiations, track your skill score and earn badges.</p>
+  <div id="msg"></div>
+  <form id="form" novalidate>
+    <div class="auth-field"><label for="username">Username</label><input id="username" name="username" autocomplete="username" required minlength="3" maxlength="24" pattern="[A-Za-z0-9_]+">
+      <div class="auth-hint">3–24 characters: letters, numbers, underscore.</div></div>
+    <div class="auth-field"><label for="email">Email</label><input id="email" type="email" name="email" autocomplete="email" required></div>
+    <div class="auth-field"><label for="password">Password</label><input id="password" type="password" name="password" autocomplete="new-password" required minlength="8">
+      <div class="pw-meter"><span id="pwBar"></span></div><div class="auth-hint" id="pwHint">At least 8 characters, with a letter and a number.</div></div>
+    <div class="auth-field"><label for="confirm">Confirm password</label><input id="confirm" type="password" name="confirm" autocomplete="new-password" required minlength="8"></div>
+    <button class="btn auth-submit" id="submit" type="submit">Create account</button>
+  </form>
+  <script>document.write(oauthBlock())</script>
+  <p class="auth-switch">Already have an account? <a href="login.html">Sign in</a></p>
+</div></div></main>
+<script>
+(async () => { if ((await Api.auth.me()).authenticated) location.href = 'index.html'; })();
+initOAuthBlock(null).then(cfg => {
+  if (cfg && cfg.email_signup === false) document.getElementById('msg').innerHTML = '<div class="auth-error">Email sign-up is temporarily unavailable. Please continue with Google or GitHub.</div>';
+});
+const pw = document.getElementById('password');
+pw.addEventListener('input', () => {
+  const v = pw.value; let score = 0;
+  if (v.length >= 8) score++; if (/[A-Za-z]/.test(v) && /[0-9]/.test(v)) score++; if (v.length >= 12) score++; if (/[^A-Za-z0-9]/.test(v)) score++;
+  document.getElementById('pwBar').style.width = (score / 4 * 100) + '%';
+});
+document.getElementById('form').onsubmit = async e => {
+  e.preventDefault();
+  const msg = document.getElementById('msg'); msg.innerHTML = '';
+  if (pw.value !== document.getElementById('confirm').value) { msg.innerHTML = '<div class="auth-error">Passwords do not match.</div>'; return; }
+  const btn = document.getElementById('submit'); btn.disabled = true; btn.textContent = 'Creating account…';
+  try {
+    await Api.auth.register(document.getElementById('username').value.trim(), document.getElementById('email').value.trim(), pw.value);
+    sessionStorage.setItem('pending_verify_email', document.getElementById('email').value.trim());
+    location.href = 'verify-email.html?pending=1';
+  } catch (err) {
+    msg.innerHTML = `<div class="auth-error">${esc(err.message)}</div>`;
+    btn.disabled = false; btn.textContent = 'Create account';
+  }
+};
+</script></body></html>

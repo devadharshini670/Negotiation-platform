@@ -1,0 +1,49 @@
+/* AI Negotiation Assistant — right-side panel. Uses the app's own theme variables so it matches
+   light and dark mode. On wide screens it docks and the page reflows (nothing is covered);
+   on narrow screens it overlays and minimizes itself when you go back to the page. */
+:root{--assistant-w:372px}
+.assistant{position:fixed;top:var(--assistant-top,0px);right:0;bottom:0;width:var(--assistant-w);max-width:100vw;z-index:60;display:flex;flex-direction:column;background:var(--surface);border-left:1px solid var(--line);box-shadow:-18px 0 44px rgba(70,52,38,.10);transform:translateX(104%);transition:transform .28s cubic-bezier(.22,.8,.3,1);font-family:var(--sans)}
+.assistant.show{transform:none}
+.assistant[hidden]{display:none}
+/* The header stays exactly where it is; the panel starts below it and only the page content makes room. */
+main{transition:padding-right .28s cubic-bezier(.22,.8,.3,1)}
+html.assistant-docked main{padding-right:var(--assistant-w)}
+.as-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 14px 12px 16px;border-bottom:1px solid var(--line);background:var(--cream)}
+.as-title{display:flex;align-items:center;gap:11px;min-width:0}
+.as-title .brandmark{width:34px;height:34px;border-radius:11px;flex:none}
+.as-title b{display:block;font-size:14.5px;color:var(--ink);letter-spacing:.005em}
+.as-title small{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.as-actions{display:flex;gap:4px}
+.as-actions button{width:32px;height:32px;border:0;border-radius:9px;background:transparent;color:var(--muted);cursor:pointer;display:grid;place-items:center}
+.as-actions button:hover{background:var(--surface2);color:var(--ink)}
+.as-actions svg{width:17px;height:17px}
+.as-body{flex:1;overflow-y:auto;padding:16px 14px 6px;display:flex;flex-direction:column;gap:11px;scroll-behavior:smooth}
+.as-msg{max-width:88%;padding:10px 13px;border-radius:15px;font-size:13.6px;line-height:1.55;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere}
+.as-msg.bot{align-self:flex-start;background:var(--surface2);color:var(--ink);border-top-left-radius:5px;border:1px solid var(--line)}
+.as-msg.me{align-self:flex-end;background:linear-gradient(135deg,#5d8192,#476b7b);color:#fff;border-top-right-radius:5px}
+.as-note{align-self:flex-start;margin:-6px 0 0 4px;font-size:11px;color:var(--soft);max-width:88%}
+.as-typing{display:inline-flex;gap:4px;align-items:center;padding:13px 15px}
+.as-typing i{width:6px;height:6px;border-radius:50%;background:var(--soft);opacity:.45;animation:asDot 1.1s infinite ease-in-out}
+.as-typing i:nth-child(2){animation-delay:.15s}.as-typing i:nth-child(3){animation-delay:.3s}
+@keyframes asDot{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-4px);opacity:.9}}
+.as-quick{display:flex;flex-wrap:wrap;gap:7px;padding:8px 14px 10px}
+.as-quick button{border:1px solid var(--line);background:var(--cream);color:var(--ink);border-radius:999px;padding:7px 11px;font:600 12px var(--sans);cursor:pointer;text-align:left;transition:background .15s,border-color .15s}
+.as-quick button:hover{background:var(--surface2);border-color:#a9bcc5}
+.as-quick .lbl{width:100%;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--soft);font-weight:700;margin-bottom:-2px}
+.as-form{display:flex;gap:8px;align-items:flex-end;padding:10px 12px 8px;border-top:1px solid var(--line);background:var(--cream)}
+.as-form textarea{flex:1;resize:none;max-height:110px;min-height:40px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface);color:var(--ink);font:14px/1.4 var(--sans);outline:none}
+.as-form textarea:focus{border-color:#7f9fae;box-shadow:0 0 0 3px rgba(93,129,146,.16)}
+.as-form button{width:40px;height:40px;flex:none;border:0;border-radius:12px;background:linear-gradient(135deg,#5d8192,#476b7b);color:#fff;cursor:pointer;display:grid;place-items:center}
+.as-form button:disabled{opacity:.5;cursor:default}
+.as-form button svg{width:17px;height:17px}
+.as-foot{padding:0 14px 11px;font-size:11px;color:var(--soft);background:var(--cream);line-height:1.4}
+html[data-theme="dark"] .assistant{box-shadow:-18px 0 44px rgba(0,0,0,.4)}
+html[data-theme="dark"] .as-quick button:hover{border-color:var(--accent)}
+@media (max-width:1179px){.assistant{width:min(392px,100vw)}}
+@media (max-width:560px){.assistant{width:100vw;border-left:0}}
+@media (prefers-reduced-motion:reduce){.assistant,main{transition:none}.as-typing i{animation:none;opacity:.6}}
+
+/* assistant error bubble + retry */
+.as-msg.as-err{background:#f6e6e4;border:1px solid #e6c9c5;color:#8a3f39}
+.as-msg.as-err .as-retry{display:block;margin-top:8px;padding:5px 11px;border-radius:9px;border:1px solid #d9b5b0;background:#fffaf9;color:#8a3f39;font-size:12px;font-weight:700;cursor:pointer}
+html[data-theme="dark"] .as-msg.as-err{background:#3a2826;border-color:#5b3a36;color:#f0c8c3}
